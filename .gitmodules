@@ -1,0 +1,3 @@
+[submodule "bin/no_degeneracy"]
+	path = bin/no_degeneracy
+	url = https://bitbucket.org/rguimera/machine-scientist/src/no_degeneracy/
