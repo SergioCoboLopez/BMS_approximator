@@ -38,18 +38,16 @@ def build_validation(all_training_points,len_validation,dataframe):
 #-----------------------------------------------------
 random.seed(a=1111)
 
-function='tanh' #tanh, leaky_ReLU, ReLU
+function='tanh' #tanh, leaky_ReLU or others
 sigma=0.0 #0.0 to 0.2 in steps of 0.02
 realization=0
 
-
-resolution='4e-3x' #1x, 2x, 0.5x, 4e-3x
+resolution='1x' #1x, 2x, 0.5x, 4e-3x
 resolutions={'1x': '0.05', '0.5x':'0.1','2x': '0.025' , '4e-3x':'0.004' }
 
 output_path='../data/' + resolution + '_resolution/trained_nns/'
 input_path= '../data/' + resolution + '_resolution/'
-filename=input_path + 'NN_' + function + '_sigma_' + str(sigma) + '_r_' + str(realization) + \
-    '_res_' + resolutions[resolution] + '.csv'
+filename=input_path + 'NN_' + function + '_sigma_' + str(sigma) + '_r_' + str(realization) + '_res_' + resolutions[resolution] + '.csv'
 
 
 d=pd.read_csv(filename)
@@ -61,9 +59,6 @@ d=d.reset_index(drop=True)
 
 #train/validation size
 n_points=int(len(d.index)/10)
-# train_fraction=5/8;valid_fraction=1/8;test_fraction=0.25
-# train_size=int(n_points*train_fraction)
-# validation_size=train_size + int(n_points*valid_fraction)
 
 #new validation scheme
 #-----------------------------------------------------
