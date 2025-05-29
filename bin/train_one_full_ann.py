@@ -35,7 +35,7 @@ random.seed(a=1111)
 function='tanh' #tanh, leaky_ReLU or others
 sigma=0.0 #0.0 to 0.2 in steps of 0.02
 n=7
-realization=0
+realization=2
 train_size=80
 
 resolution='1x' #1x, 2x, 0.5x, 4e-3x
