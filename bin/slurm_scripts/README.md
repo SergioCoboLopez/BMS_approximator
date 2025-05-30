@@ -1,0 +1,1 @@
+This folder contains three scripts that I use to launch jobs to a slurm-operated cluster. The scripts are tailored to my experiments, but can be costumized depending on your needs.

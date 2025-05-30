@@ -1,0 +1,2 @@
+This folder contains all the codes needed to generate the results in the paper.
+The codes can be tailored to your specific needs: different neural network architecture, number of functions, levels of Gaussian noise and so on.

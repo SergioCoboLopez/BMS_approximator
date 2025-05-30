@@ -1,0 +1,2 @@
+This folder contains codes that generate results specific for the tutorial notebook and that are not going to be used anywhere else.
+The long-term goal would be to incorporate these codes on the notebook.

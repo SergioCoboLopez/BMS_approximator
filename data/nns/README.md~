@@ -1,0 +1,5 @@
+This folder contains data files with predictions of neural networks with the following architecture:
+
+Input Layer Size: 1
+Number of layers: 5
+Layer Size: 10

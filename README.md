@@ -7,3 +7,4 @@ To clone this repository in your local computer you must follow these steps:
 3. git submodule update
 
 The second and third steps are needed to clone and update the Bayesian Machine Scientist submodule.
+
