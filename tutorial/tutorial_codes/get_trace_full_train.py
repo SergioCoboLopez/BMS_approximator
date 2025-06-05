@@ -30,7 +30,7 @@ resolutions={'0.5x':'0.1', '1x':'0.05' , '2x': '0.025' , '4e-3x':'0.004' }
 
 d=pd.read_csv('../data/noisy_data/' + resolution + '_resolution/NN_' + function + '_sigma_' + str(sigma) + '_r_' + str(realization)  + '_res_' + resolutions[resolution] + '.csv')
 
-filename = 'BMS_test_full_train_' + function + '_n_' + str(n) + '_sigma_' + str(sigma) + '_r_' + str(realization) 
+filename = 'BMS_full_train_' + function + '_n_' + str(n) + '_sigma_' + str(sigma) + '_r_' + str(realization) + '_id_' + str(runid)
 #-------------------------------------------------------------------
     
 #Take specific function and -2/+2 interval
@@ -42,7 +42,6 @@ d=d[(d['x1'] >= -2.0) & (d['x1']<=2.0)];d=d.reset_index(drop=True)
 #Train set
 #---------------------------------------
 n_points=int(len(d.index))
-#train_fraction=3/4
 train_fraction=1
 train_size=int(n_points*train_fraction)
 d=d.loc[0:train_size-1]
