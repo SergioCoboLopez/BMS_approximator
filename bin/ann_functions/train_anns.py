@@ -40,15 +40,17 @@ random.seed(a=1111)
 
 function='tanh' #tanh, leaky_ReLU or others
 sigma=0.0 #0.0 to 0.2 in steps of 0.02
-realization=0
+realization=1
 
 resolution='1x' #1x, 2x, 0.5x, 4e-3x
 resolutions={'1x': '0.05', '0.5x':'0.1','2x': '0.025' , '4e-3x':'0.004' }
 
-output_path='../data/' + resolution + '_resolution/trained_nns/'
-input_path= '../data/' + resolution + '_resolution/'
+
+
+input_path= '../../data/noisy_data/' + resolution + '_resolution/'
 filename=input_path + 'NN_' + function + '_sigma_' + str(sigma) + '_r_' + str(realization) + '_res_' + resolutions[resolution] + '.csv'
 
+output_path='../../data/nns/' + resolution + '_resolution/approximation/'
 
 d=pd.read_csv(filename)
 d=d.drop(columns='Unnamed: 0')
@@ -77,9 +79,6 @@ NL, LS = 5, 10
 arch=[ILS] + NL*[LS] + [OLS]
 nn=pyrenn.CreateNN(arch)
 
-#Cross validations
-train_border=d[d['rep']==0].loc[train_size-1]['x1']
-
 n_functions=int(d['rep'].max()) #Number of functions in dataset
 iterations=300
 
@@ -92,14 +91,9 @@ for n in range(n_functions + 1):
     #Get training and validation points
     train_set, validation_set=build_validation(pre_train_size, validation_points, dn)
 
-    xtrain=train_set['x1']
-    ytrain=train_set['y_noise']
+    xtrain=train_set['x1'];ytrain=train_set['y_noise']
 
-    xvalid=validation_set['x1']
-    yvalid=validation_set['y_noise']
-
-    print(train_set[:40])
-    print(validation_set)
+    xvalid=validation_set['x1'];yvalid=validation_set['y_noise']
 
     #Error and neural network vectors
     MAE=[];MSE=[];RMSE=[]        #Lists of validation errors
@@ -117,24 +111,12 @@ for n in range(n_functions + 1):
 
         #Validation errors
         #--------------------------------------------------
-        # MSE_i=mean_squared_error(yvalid,yvalid_pred)
-        # MSE.append(MSE_i)
-
-        # MAE_i=mean_absolute_error(yvalid,yvalid_pred)
-        # MAE.append(MAE_i)
-
         RMSE_i=root_mean_squared_error(yvalid,yvalid_pred)
         RMSE.append(RMSE_i)
         #--------------------------------------------------
 
         #Training errors
         #--------------------------------------------------
-        # MSE_t_i=mean_squared_error(ytrain,yvalid_test)
-        # MSE_t.append(MSE_t_i)
-
-        # MAE_t_i=mean_absolute_error(ytrain,yvalid_test)
-        # MAE_t.append(MAE_t_i)
-        
         RMSE_t_i=root_mean_squared_error(ytrain,yvalid_test)
         RMSE_t.append(RMSE_t_i)
         #--------------------------------------------------
@@ -148,11 +130,9 @@ for n in range(n_functions + 1):
 #--------------------------------------------------
         
     #Find the model with the minimum error
-    #min_error_mse=min(MSE);
     min_error_rmse=min(RMSE)
 
     #Take indices of the elements with minimum error
-    #min_err_mse_ind=MSE.index(min_error_mse);
     min_err_rmse_ind=RMSE.index(min_error_rmse)
     #--------------------------------------------------------
 
@@ -161,7 +141,7 @@ for n in range(n_functions + 1):
 
     #Figure settings
     #--------------------------------
-    output_path_fig='../results/nn_w_validation/'
+    output_path_fig='../../results/nn_validations/'
     name_fig='validation_errors_' + 'sigma_' + str(sigma) + '_' + str(function) + '_' + str(n) + '_r_' + str(realization) + '.png'
     
     #Define figure size
@@ -173,10 +153,7 @@ for n in range(n_functions + 1):
     size_axis=7;size_ticks=6;size_title=5
     line_w=1;marker_s=3
     #--------------------------------
-    #plt.plot(MAE, '.', markersize=6, color='blue', label='MAE validation')
     plt.plot(RMSE,'.',markersize=6,color='green',label='RMSE validation')
-
-    #plt.plot(MAE_t, linewidth=1,linestyle='--',color='blue',label='MAE train')
     plt.plot(RMSE_t,linewidth=1,linestyle='--',color='green',label='RMSE train')
     plt.scatter(min_err_rmse_ind,min_error_rmse,s=80,marker='*',color='red',label='minimum rmse')
     #--------------------------------------------------------
@@ -185,8 +162,6 @@ for n in range(n_functions + 1):
     plt.legend(loc='best', fontsize=size_ticks)
     plt.xlabel('iterations',fontsize=size_axis);plt.ylabel('error',fontsize=size_axis)
     plt.title('%s, n=%d' % (function, n),fontsize=size_title)
-
-    plt.tight_layout()
     plt.savefig(output_path_fig+name_fig,dpi=300)
     
 
@@ -194,12 +169,11 @@ for n in range(n_functions + 1):
     #------------------------------------------------------
     net_best=nn_dict[min_err_rmse_ind]
     xtest = dn.loc[pre_train_size:]['x1']
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     xtrain_valid=dn.loc[:pre_train_size-1]['x1']
     ytest_best = pyrenn.NNOut(xtrain_valid,net_best)
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     ypred_best = pyrenn.NNOut(xtest,net_best)
-    
     ymodel_best=np.concatenate((ytest_best, ypred_best))
     #------------------------------------------------------
 

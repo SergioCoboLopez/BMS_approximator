@@ -40,16 +40,17 @@ random.seed(a=1111)
 sigma=sys.argv[1]
 realization=int(sys.argv[2])
 
-resolution='1x' #1x, 2x, 0.5x, 4e-3x 
-resolutions={'0.5x':'0.1', '1x':'0.05', '2x': '0.025', '4e-3x':'0.004' }
+# resolution='1x' #1x, 2x, 0.5x, 4e-3x 
+# resolutions={'0.5x':'0.1', '1x':'0.05', '2x': '0.025', '4e-3x':'0.004' }
 
-input_path='../../data/nguyen/' + resolution + '_resolution/'
-output_path=input_path+ 'trained_nns/'
+input_path='../../data/noisy_data/nguyen/'
 filename=input_path + 'NN_nguyen_sigma_' + str(sigma) + '_r_' + str(realization) +  '.csv'
-    
+
 d=pd.read_csv(filename)
 d=d.drop(columns='Unnamed: 0')
 d=d.reset_index(drop=True)
+
+output_path='../../data/nns/nguyen/approximation/'
 #-----------------------------------------------------
 
 
@@ -77,7 +78,6 @@ nn=pyrenn.CreateNN(arch)
 #Cross validations
 iterations=300
 
-
 for n in n_nguyen:
     #Read data
     dn=d[d['rep']==n]
@@ -86,22 +86,12 @@ for n in n_nguyen:
 
     train_set, validation_set=build_validation(pre_train_size, validation_points, dn)
 
-    xtrain=train_set['x']
-    ytrain=train_set['z_noise']
+    xtrain=train_set['x'];ytrain=train_set['z_noise']
 
-    xvalid=validation_set['x']
-    yvalid=validation_set['z_noise']
+    xvalid=validation_set['x'];yvalid=validation_set['z_noise']
 
     print(xvalid)
     print(yvalid)
-    # #Train NN
-    # #Train on the  first points
-    # xtrain = dn.loc[0:train_size-1]['x']
-    # ytrain = dn.loc[0:train_size-1]['z_noise']
-
-    # #Build validation set
-    # xvalid=dn.loc[train_size:validation_size-1]['x']
-    # yvalid=dn.loc[train_size:validation_size-1]['z_noise']
 
     #Error and neural network vectors
     MAE=[];MSE=[];RMSE=[]        #Lists of validation errors
@@ -192,22 +182,6 @@ for n in n_nguyen:
     ext=extensions[0]
     plt.savefig(output_path_fig+name_fig+ext,dpi=300)
     
-    #First NN found
-    # net_first=nn_dict[0]
-    # xtest = dn.loc[train_size:]['x']
-    # ytest_first = pyrenn.NNOut(xtrain,net_first)
-    # ypred_first = pyrenn.NNOut(xtest,net_first)
-    # #save results
-    # ymodel_n=np.concatenate((ytest_first, ypred_first))
-
-    # #Last NN found
-    # net_last=nn_dict[iterations-1]
-    # xtest = dn.loc[train_size:]['x']
-    # ytest_last = pyrenn.NNOut(xtrain,net_last)
-    # ypred_last = pyrenn.NNOut(xtest,net_last)
-    # #save results
-    # ymodel_last=np.concatenate((ytest_last, ypred_last))
-
     #Best nn found
     #------------------------------------------------------
     net_best=nn_dict[min_err_rmse_ind]
@@ -216,53 +190,10 @@ for n in n_nguyen:
     ytest_best = pyrenn.NNOut(xtrain_valid,net_best)
     ypred_best = pyrenn.NNOut(xtest,net_best)
     ymodel_best=np.concatenate((ytest_best, ypred_best))
-    
-    # ytest_best = pyrenn.NNOut(xtrain,net_best)
-    # ypred_best = pyrenn.NNOut(xtest,net_best)
-    # ymodel_best=np.concatenate((ytest_best, ypred_best))
     #------------------------------------------------------
 
     #Save neural network
     pyrenn.saveNN(net_best, output_path + 'NN_weights_no_overfit_sigma_' + str(sigma) + '_rep_' + str(n) + '_r_' + str(realization) + '.csv')
-
-    
-
-#    xplot=np.concatenate((xtrain,xtest))
-
-    #Figure settings                                                 
-    #--------------------------------
-    # name_fig='no_overfit_prediction_sigma_' + str(sigma) + '_'  + str(n) + '_r_' + str(realization)
-
-    # #Define figure size
-    # cm = 1/2.54 #convert inch to cm
-    # width = 10*cm; height=8*cm 
-
-    # #Fonts and sizes
-    # size_axis=7;size_ticks=6;size_title=5
-    # line_w=1;marker_s=3
-    #--------------------------------
-
-
-    # fig=figure(figsize=(width,height), dpi=300)
-    # plt.axvline(x=train_border,linestyle='--',linewidth=line_w, color='k')
-    # plt.axvline(x=valid_border,linestyle='--',linewidth=line_w, color='k')
-    
-    # plt.plot(xplot,ymodel_n,'k', label='first nn model')
-    # plt.plot(xplot,ymodel_last,'r', label='last nn model')
-    # plt.plot(xplot,ymodel_best,'green',label='best nn model') 
-    # plt.plot(xplot,dn.z_noise, 'orange', label='noise')
-    # plt.plot(xplot,dn.z, '.', color= 'blue', label='original')
-
-
-    # print(n)
-    # print(type(n))
-    # plt.title('n=%d' % (n) ,fontsize=size_title)
-    # plt.xlabel('x',fontsize=size_axis);plt.ylabel('y',fontsize=size_axis)
-    # plt.xticks(fontsize=size_ticks);plt.yticks(fontsize=size_ticks)
-    # plt.xlim(-2,2);plt.ylim(-0.1,1.1)
-    # plt.legend(loc='best', fontsize=size_ticks)
-    
-    # plt.savefig(output_path+name_fig+ext,dpi=300)
 
     try:
         ymodel=np.append(ymodel,ymodel_best)

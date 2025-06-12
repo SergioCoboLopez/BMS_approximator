@@ -1,4 +1,6 @@
 #2025-05-30. This code builds BMS traces from ANN-generated data
+#something's wrong with this code. It generates traces with a 'None' factor in the equations.
+
 
 import sys
 import pandas as pd
@@ -11,7 +13,7 @@ warnings.filterwarnings("ignore")
 import os
 
 #Set the current working directory in Python
-os.chdir('/export/home/shared/Projects/ANN/Sergio/BMS_approximator/bin/ann_functions/')
+os.chdir('/export/home/shared/Projects/ANN/Sergio/BMS_approximator/bin/ann_functions')
 
 # Command-line arguments
 # -------------------------------------------------------------------
@@ -30,9 +32,7 @@ resolutions={'0.5x':'0.1', '1x':'0.05' , '2x': '0.025' , '4e-3x':'0.004' }
 
 d=pd.read_csv('../../data/noisy_data/' + resolution + '_resolution/NN_' + function + '_sigma_' + str(sigma) + '_r_' + str(realization)  + '_res_' + resolutions[resolution] + '.csv')
 
-filename = 'BMS_chorizos_' + function + '_n_' + str(n) + '_sigma_' + str(sigma) + '_r_' + str(realization) 
-
-#filename=resolution + '_resolution/BMS_' + function + '_n_' + str(n) + '_sigma_' + str(sigma) + '_r_' + str(realization) + '_id_' + str(runid)
+filename = 'test_BMS_' + function + '_n_' + str(n) + '_sigma_' + str(sigma) + '_r_' + str(realization) 
 #-------------------------------------------------------------------
     
 #Take specific function and -2/+2 interval
@@ -93,9 +93,7 @@ pms = Parallel(
 description_lengths, mdl, mdl_model = [], np.inf, None
 
 
-outf = open('../../data/tutorial/'+ filename + '_trace_' + str(NSTEP) + '_prior_' + str(NPAR) + '.csv', 'w')
-
-#outf = open('../data/MSTraces/'+ resolution + '_resolution/filename' + '_trace_' + str(NSTEP) + '_prior_' + str(NPAR) + '.csv', 'w')
+outf = open('../../data/MSTraces/'+ resolution + '_resolution/' + filename + '_trace_' + str(NSTEP) + '_prior_' + str(NPAR) + '.csv', 'w')
 outf.close()
 
 # MCMC
@@ -106,8 +104,8 @@ for i in tqdm(range(NSTEP)):
     # Add the description length to the trace
     description_lengths.append(pms.t1.E)
 
-    outf = open('../../data/MSTraces/'+ filename + '_trace_' + str(NSTEP) + '_prior_' + str(NPAR) +  '.csv', 'a')
-#    outf = open('../data/MSTraces/'+ filename + '_trace_' + str(NSTEP) + '_prior_' + str(NPAR) +  '.csv', 'a')
+    outf = open('../../data/MSTraces/'+ resolution + '_resolution/' +filename + '_trace_' + str(NSTEP) + '_prior_' + str(NPAR) +  '.csv', 'a')
+
     print(
         ';'.join([
         str(kk) for kk in [i, pms.t1.E, pms.t1.pr(show_pow=True),

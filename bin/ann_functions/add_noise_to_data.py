@@ -10,30 +10,50 @@ import matplotlib.gridspec as gridspec
 
 np.random.seed(seed=1111)
 
-function='tanh' #tanh, leaky_ReLU, ReLU
-mean=0;sigma=0.2;realization=0
-sigmas=[i for i in np.arange(0,0.22,0.02)]
-
-#Read double resolution file
-file_data='NN_function_' + function + '_NREP_10_data' + '.csv'
-data='../data/generative_data/' + file_data
-d=pd.read_csv(data)
-d=d.drop(columns='Unnamed: 0')
-print(d)
-
-sample=d.index.stop
-print(d.index.stop)
+resolutions={'0.5x':'0.1', '1x':'0.05' , '2x': '0.025' , '4e-3x':'0.004' }
 
 
-for sigma in sigmas:
-    for r in range(3):
-        
-        noise = np.random.normal(mean,sigma,sample)            
+def add_noise_to_data(activation_function, resolution_var, sigma_v, realizations):
 
-        #Add Gaussian noise to data
-        d['noise']=noise
-        d['y_noise']= d['y'] + d['noise']
-        
-        #Save data
-        d.to_csv('../data/nns/1x_resolution/' + 'NN_' + function + '_sigma_' + str(sigma) + '_r_' + str(r) +  '.csv')
+    NREP=10
+
+    #read data
+    input_path='../../data/generative_data/'
+    filename='NN_function_' + activation_function + '_NREP_' + str(NREP) + '_res_'+ resolutions[resolution_var] + '_data' + '.csv'
+    data=input_path + filename
+
+    d=pd.read_csv(data)
+    d=d.drop(columns='Unnamed: 0')
+
+    #add noise
+    mean=0;sample=d.index.stop
+
+    for sigma in sigma_v:
+        for r in range(realizations):
+
+            noise = np.random.normal(mean,sigma,sample)
+
+            #Add Gaussian noise to data
+            d['noise']=noise
+            d['y_noise']= d['y'] + d['noise']
+
+            #Save data
+            output_path='../../data/noisy_data/' + resolution_var + '_resolution/'
+            d.to_csv(output_path + 'NN_' + activation_function + '_sigma_' + str(sigma) + '_r_' + str(r) + '_res_' + resolutions[resolution_var] +   '.csv')
+
+    return None
+
+
+
+resolution='1x' #'0.5x', '1x', '2x', '4e-3'
+
+function='leaky_ReLU' #tanh, leaky_ReLU, ReLU
+r=3
+
+sigma_max=0.2
+sigma_step=0.02
+sigmas=[i for i in np.arange(0,sigma_max + sigma_step,sigma_step)]
+
+add_noise_to_data(function, resolution, sigmas, r)
+
 

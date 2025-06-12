@@ -69,7 +69,6 @@ from fit_prior import read_prior_par
 # Choose and initialize priors and temperatures
 if NPAR==10:
     prior_par = read_prior_par('no_degeneracy/Prior/final_prior_param_sq.named_equations.nv1.np10.2017-10-18 18:07:35.089658.dat')
-
 elif NPAR==20:
     prior_par = read_prior_par('no_degeneracy/Prior/final_prior_param_sq.named_equations.nv1.np20.maxs200.2024-05-10 162907.551306.dat')
 
@@ -114,4 +113,3 @@ for i in tqdm(range(NSTEP)):
     # Check if this is the MDL expression so far
     if pms.t1.E < mdl:
         mdl, mdl_model = pms.t1.E, deepcopy(pms.t1)
-        
