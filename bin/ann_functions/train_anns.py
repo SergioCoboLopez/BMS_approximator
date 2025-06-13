@@ -26,6 +26,8 @@ from sklearn.metrics import mean_absolute_error
 from random import sample
 import random
 
+#Build validation set by randomly taking points from the training set
+#-------------------------------------------------------------------
 def build_validation(all_training_points,len_validation,dataframe):
 
     pre_train_df=dataframe.loc[0:all_training_points-1]    
@@ -33,18 +35,91 @@ def build_validation(all_training_points,len_validation,dataframe):
     train_df=pre_train_df.drop(labels=validation_points)
 
     return train_df, validation_df
+#-------------------------------------------------------------------
+
+#A function to train a neural network for one specific function
+#-------------------------------------------------------------------
+def train_one_nn(iterations, neural_network, x_train, y_train, x_valid, y_valid):
+
+    #Error and neural network vectors
+    MAE_valid=[];MSE_valid=[];RMSE_valid=[] #Lists of validation errors
+    MAE_train=[];MSE_train=[];RMSE_train=[] #List of training errors
+    neural_network_dict={} #Dictionary of neural network models
+#--------------------------------------------------
+    for i in range(iterations):
+        #Two iterations of training a neural network (k_max=1)
+        net=pyrenn.train_LM(x_train, y_train, neural_network, verbose=False,k_max=1,E_stop=1e-200)
+        
+        #Test NN on validation set
+        y_valid_test = pyrenn.NNOut(x_train,net) #Prediction on train
+        y_valid_pred = pyrenn.NNOut(x_valid,net) #Prediction on validation set
+
+        #Validation errors
+        #--------------------------------------------------
+        RMSE_valid_i=root_mean_squared_error(y_valid,y_valid_pred)
+        RMSE_valid.append(RMSE_valid_i)
+        #--------------------------------------------------
+
+        #Training errors
+        #--------------------------------------------------
+        RMSE_train_i=root_mean_squared_error(y_train,y_valid_test)
+        RMSE_train.append(RMSE_train_i)
+        #--------------------------------------------------
+
+        #deepcopy and save neural network to dictionary
+        net_copy=copy.deepcopy(net)
+        neural_network_dict[i]=net_copy
+        
+        #update neural network for next step of the loop
+        neural_network=net
+
+    return neural_network_dict, RMSE_valid, RMSE_train
+#--------------------------------------------------
+
+#A function to plot the validation rmse errors across iterations
+#-----------------------------------------------------------------
+def plot_validation_figure(RMSE_valid,RMSE_train,minimum_rmse_index,minimum_rmse,name_figure):
+    
+    #Figure settings
+    #--------------------------------
+    output_path_fig='../../results/nn_validations/'
+    name_figure=name_figure + '.png'
+    
+    #Define figure size
+    cm = 1/2.54 #convert inch to cm                                  
+    width = 10*cm; height=8*cm
+    fig=figure(figsize=(width,height), dpi=300)
+
+    #Fonts and sizes
+    size_axis=7;size_ticks=6;size_title=5
+    line_w=1;marker_s=3
+    
+    #--------------------------------
+    plt.plot(RMSE_valid,'.',markersize=6,color='green',label='RMSE validation')
+    plt.plot(RMSE_train,linewidth=1,linestyle='--',color='green',label='RMSE train')
+    plt.scatter(minimum_rmse_index,minimum_rmse,s=80,marker='*',color='red',label='minimum rmse')
+    #--------------------------------------------------------
+
+    #Labels
+    plt.legend(loc='best', fontsize=size_ticks)
+    plt.xlabel('iterations',fontsize=size_axis);plt.ylabel('error',fontsize=size_axis)
+    plt.title('%s, n=%d' % (function, n),fontsize=size_title)
+    plt.savefig(output_path_fig+name_figure,dpi=300)
+
+    return None
+#-----------------------------------------------------------------
+
+        
 
 #Read data
 #-----------------------------------------------------
 random.seed(a=1111)
 
-function='tanh' #tanh, leaky_ReLU or others
-sigma=0.0 #0.0 to 0.2 in steps of 0.02
-realization=1
-
-resolution='1x' #1x, 2x, 0.5x, 4e-3x
+function=sys.argv[1]     #tanh, leaky_ReLU or others
+sigma=sys.argv[2]        #0.0 to 0.2 in steps of 0.02
+realization=sys.argv[3]  #0,1,2
+resolution=sys.argv[4]   #1x, 2x, 0.5x, 4e-3x
 resolutions={'1x': '0.05', '0.5x':'0.1','2x': '0.025' , '4e-3x':'0.004' }
-
 
 
 input_path= '../../data/noisy_data/' + resolution + '_resolution/'
@@ -62,16 +137,14 @@ d=d.reset_index(drop=True)
 #train/validation size
 n_points=int(len(d.index)/10)
 
-#new validation scheme
+#Define cross-validation
 #-----------------------------------------------------
-pre_train_fraction=3/4;pre_train_size=int(n_points*pre_train_fraction)
-validation_fraction=1/8;validation_size=int(n_points*validation_fraction)
-validation_points=sample(range(pre_train_size), k=validation_size)#sample points from uniform sample
-validation_points=np.sort(validation_points)
-print(validation_size)
-print(validation_points)
-#-----------------------------------------------------
+pre_train_fraction=3/4;pre_train_size=int(n_points*pre_train_fraction) #train
 
+validation_fraction=1/8;validation_size=int(n_points*validation_fraction)
+validation_points=sample(range(pre_train_size),k=validation_size)#sample points from uniform sample
+validation_points=np.sort(validation_points)
+#-----------------------------------------------------
 
 #Build ANN
 ILS = 1;OLS=1
@@ -82,6 +155,7 @@ nn=pyrenn.CreateNN(arch)
 n_functions=int(d['rep'].max()) #Number of functions in dataset
 iterations=300
 
+
 for n in range(n_functions + 1):
     #Read data
     dn=d[d['rep']==n]
@@ -90,81 +164,26 @@ for n in range(n_functions + 1):
 
     #Get training and validation points
     train_set, validation_set=build_validation(pre_train_size, validation_points, dn)
-
     xtrain=train_set['x1'];ytrain=train_set['y_noise']
-
     xvalid=validation_set['x1'];yvalid=validation_set['y_noise']
 
-    #Error and neural network vectors
-    MAE=[];MSE=[];RMSE=[]        #Lists of validation errors
-    MAE_t=[];MSE_t=[]; RMSE_t=[] #List of training errors
-    nn_dict={} #Dictionary of neural network models
+    #train nn 300 times and save nns
+    nn_dict, RMSE_v, RMSE_t =train_one_nn(iterations, nn, xtrain, ytrain, xvalid, yvalid)
 
-#--------------------------------------------------
-    for i in range(iterations):
-        #Two iterations of training a neural network (k_max=1)
-        net=pyrenn.train_LM(xtrain,ytrain,nn,verbose=True,k_max=1,E_stop=1e-200)
-        
-        #Test NN on validation set
-        yvalid_test = pyrenn.NNOut(xtrain,net) #Prediction on train
-        yvalid_pred = pyrenn.NNOut(xvalid,net) #Prediction on validation set
-
-        #Validation errors
-        #--------------------------------------------------
-        RMSE_i=root_mean_squared_error(yvalid,yvalid_pred)
-        RMSE.append(RMSE_i)
-        #--------------------------------------------------
-
-        #Training errors
-        #--------------------------------------------------
-        RMSE_t_i=root_mean_squared_error(ytrain,yvalid_test)
-        RMSE_t.append(RMSE_t_i)
-        #--------------------------------------------------
-
-        #deepcopy and save neural network to dictionary
-        net_copy=copy.deepcopy(net)
-        nn_dict[i]=net_copy
-        
-        #update neural network for next step of the loop
-        nn=net
-#--------------------------------------------------
-        
     #Find the model with the minimum error
-    min_error_rmse=min(RMSE)
-
+    min_error_rmse=min(RMSE_v)
     #Take indices of the elements with minimum error
-    min_err_rmse_ind=RMSE.index(min_error_rmse)
+    min_err_rmse_ind=RMSE_v.index(min_error_rmse)
     #--------------------------------------------------------
 
-    #Plot errors
+    #Plot validation errors
     #----------------------------------------------------
-
-    #Figure settings
-    #--------------------------------
-    output_path_fig='../../results/nn_validations/'
-    name_fig='validation_errors_' + 'sigma_' + str(sigma) + '_' + str(function) + '_' + str(n) + '_r_' + str(realization) + '.png'
+    name_fig='validation_errors_sigma_' + str(sigma) + '_' + str(function) + '_' + \
+    str(n) + '_r_' + str(realization)
     
-    #Define figure size
-    cm = 1/2.54 #convert inch to cm                                  
-    width = 10*cm; height=8*cm
-    fig=figure(figsize=(width,height), dpi=300)
-
-    #Fonts and sizes
-    size_axis=7;size_ticks=6;size_title=5
-    line_w=1;marker_s=3
-    #--------------------------------
-    plt.plot(RMSE,'.',markersize=6,color='green',label='RMSE validation')
-    plt.plot(RMSE_t,linewidth=1,linestyle='--',color='green',label='RMSE train')
-    plt.scatter(min_err_rmse_ind,min_error_rmse,s=80,marker='*',color='red',label='minimum rmse')
-    #--------------------------------------------------------
-
-    #Labels
-    plt.legend(loc='best', fontsize=size_ticks)
-    plt.xlabel('iterations',fontsize=size_axis);plt.ylabel('error',fontsize=size_axis)
-    plt.title('%s, n=%d' % (function, n),fontsize=size_title)
-    plt.savefig(output_path_fig+name_fig,dpi=300)
+    plot_validation_figure(RMSE_v, RMSE_t, min_err_rmse_ind, min_error_rmse,name_fig)
+    #----------------------------------------------------
     
-
     #Best nn found
     #------------------------------------------------------
     net_best=nn_dict[min_err_rmse_ind]
@@ -174,16 +193,18 @@ for n in range(n_functions + 1):
     ytest_best = pyrenn.NNOut(xtrain_valid,net_best)
 
     ypred_best = pyrenn.NNOut(xtest,net_best)
-    ymodel_best=np.concatenate((ytest_best, ypred_best))
+    ymodel_best= np.concatenate((ytest_best, ypred_best))
     #------------------------------------------------------
 
     #Save neural network
+    #------------------------------------------------------
     pyrenn.saveNN(net_best, output_path + 'NN_weights_no_overfit_' + function + '_sigma_' + str(sigma) + '_rep_' + str(n) + '_r_' + str(realization) + '.csv')
 
     try:
         ymodel=np.append(ymodel,ymodel_best)
     except NameError:
         ymodel=ymodel_best
+    #------------------------------------------------------
 
 
 #Add predictions to data
@@ -191,3 +212,4 @@ d['ymodel']=ymodel
 
 #Save updated data with model
 d.to_csv( output_path + 'NN_no_overfit_' + function + '_sigma_' + str(sigma) + '_r_' + str(realization) + '.csv')
+

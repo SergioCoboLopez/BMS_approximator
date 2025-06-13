@@ -23,7 +23,8 @@ from sklearn.metrics import mean_absolute_error
 from random import sample
 import random
 
-
+#Build validation set by randomly taking points from the training set                               
+#-------------------------------------------------------------------
 def build_validation(all_training_points,len_validation,dataframe):
 
     pre_train_df=dataframe.loc[0:all_training_points-1]
@@ -32,7 +33,84 @@ def build_validation(all_training_points,len_validation,dataframe):
     train_df=pre_train_df.drop(labels=validation_points)
 
     return train_df, validation_df
+#-------------------------------------------------------------------
 
+#A function to train a neural network for one specific function                                     
+#-------------------------------------------------------------------
+def train_one_nn(iterations, neural_network, x_train, y_train, x_valid, y_valid):
+
+    #Error and neural network vectors
+    MAE_valid=[];MSE_valid=[];RMSE_valid=[]        #Lists of validation errors
+    MAE_train=[];MSE_train=[]; RMSE_train=[] #List of training errors
+    neural_network_dict={} #Dictionary of neural network models
+
+#--------------------------------------------------
+    for i in range(iterations):
+        #Two iterations of training a neural network (k_max=1)
+        net=pyrenn.train_LM(x_train,y_train,neural_network,verbose=False,k_max=1,E_stop=1e-200)
+        
+        #Test NN on validation set
+        y_valid_test = pyrenn.NNOut(xtrain,net) #Prediction on train
+        y_valid_pred = pyrenn.NNOut(xvalid,net) #Prediction on valid
+
+        #Validation errors
+        #--------------------------------------------------
+        RMSE_valid_i=root_mean_squared_error(y_valid,y_valid_pred)
+        RMSE_valid.append(RMSE_valid_i)
+        #--------------------------------------------------
+
+        #Training errors
+        #--------------------------------------------------
+        RMSE_train_i=root_mean_squared_error(y_train,y_valid_test)
+        RMSE_train.append(RMSE_train_i)
+        #--------------------------------------------------
+
+        #deepcopy and save neural network to dictionary
+        net_copy=copy.deepcopy(net)
+        neural_network_dict[i]=net_copy
+        
+        #update neural network for next step of the loop
+        neural_network=net
+
+    return neural_network_dict, RMSE_valid, RMSE_train
+#--------------------------------------------------
+
+#A function to plot the validation rmse errors across iterations
+#-----------------------------------------------------------------
+def plot_validation_figure(RMSE_valid,RMSE_train,minimum_rmse_index,minimum_rmse,name_figure):
+
+    #Figure settings
+    #--------------------------------
+    output_path_fig='../../results/nn_w_validation_nguyen/'
+    name_figure=name_figure + '.png'
+    print(name_figure)
+    
+    #Define figure size
+    cm = 1/2.54 #convert inch to cm                                  
+    width = 10*cm; height=8*cm
+    fig=figure(figsize=(width,height), dpi=300)
+
+    #Fonts and sizes
+    size_axis=7;size_ticks=6;size_title=5
+    line_w=1;marker_s=3
+    
+    #--------------------------------
+    plt.plot(RMSE_valid,'.',markersize=6,color='green',label='RMSE validation')
+    plt.plot(RMSE_train,linewidth=1,linestyle='--',color='green',label='RMSE train')
+    plt.scatter(minimum_rmse_index,minimum_rmse,s=80,marker='*',color='red',label='minimum rmse')
+    #--------------------------------------------------------
+
+    #Labels
+    plt.legend(loc='best', fontsize=size_ticks)
+    plt.xlabel('iterations',fontsize=size_axis);plt.ylabel('error',fontsize=size_axis)
+    plt.title('n=%d' %  n,fontsize=size_title)
+    plt.savefig(output_path_fig+name_figure,dpi=300)
+    
+    return None
+#-----------------------------------------------------------------
+
+
+    
 #Read data
 #-----------------------------------------------------
 random.seed(a=1111)
@@ -40,8 +118,6 @@ random.seed(a=1111)
 sigma=sys.argv[1]
 realization=int(sys.argv[2])
 
-# resolution='1x' #1x, 2x, 0.5x, 4e-3x 
-# resolutions={'0.5x':'0.1', '1x':'0.05', '2x': '0.025', '4e-3x':'0.004' }
 
 input_path='../../data/noisy_data/nguyen/'
 filename=input_path + 'NN_nguyen_sigma_' + str(sigma) + '_r_' + str(realization) +  '.csv'
@@ -55,19 +131,19 @@ output_path='../../data/nns/nguyen/approximation/'
 
 
 #train/validation size 
-#-----------------------------------------------------
+#----------------------------------------
 n_nguyen=[1, 5 , 7, 8, 10]
 n_points=int(len(d.index)/len(n_nguyen))
-print(n_points)
+#----------------------------------------
+
+#Define cross-validation
+#---------------------------------------------------------------------
 pre_train_fraction=3/4;pre_train_size=int(n_points*pre_train_fraction)
-print(pre_train_size)
+
 validation_fraction=1/8;validation_size=int(n_points*validation_fraction)
 validation_points=sample(range(pre_train_size), k=validation_size)
 validation_points=np.sort(validation_points)
-
-with open( output_path + 'validation_s_%s_r_%d' %(sigma, realization) + '.txt', 'a') as the_file:
-    the_file.write(str(validation_points))
-#-----------------------------------------------------
+#---------------------------------------------------------------------
 
 #Build ANN
 ILS = 1;OLS=1
@@ -85,102 +161,28 @@ for n in n_nguyen:
     dn=dn.reset_index(drop=True)
 
     train_set, validation_set=build_validation(pre_train_size, validation_points, dn)
-
     xtrain=train_set['x'];ytrain=train_set['z_noise']
-
     xvalid=validation_set['x'];yvalid=validation_set['z_noise']
 
-    print(xvalid)
-    print(yvalid)
-
-    #Error and neural network vectors
-    MAE=[];MSE=[];RMSE=[]        #Lists of validation errors
-    MAE_t=[];MSE_t=[]; RMSE_t=[] #List of training errors
-    nn_dict={} #Dictionary of neural network models
-
-#--------------------------------------------------
-    for i in range(iterations):
-        #Two iterations of training a neural network (k_max=1)
-        net=pyrenn.train_LM(xtrain,ytrain,nn,verbose=True,k_max=1,E_stop=1e-200)
-        
-        #Test NN on validation set
-        yvalid_test = pyrenn.NNOut(xtrain,net) #Prediction on train
-        yvalid_pred = pyrenn.NNOut(xvalid,net) #Prediction on valid
-
-        #Validation errors
-        #--------------------------------------------------
-        MSE_i=mean_squared_error(yvalid,yvalid_pred)
-        MSE.append(MSE_i)
-
-        MAE_i=mean_absolute_error(yvalid,yvalid_pred)
-        MAE.append(MAE_i)
-
-        RMSE_i=root_mean_squared_error(yvalid,yvalid_pred)
-        RMSE.append(RMSE_i)
-        #--------------------------------------------------
-
-        #Training errors
-        #--------------------------------------------------
-        MSE_t_i=mean_squared_error(ytrain,yvalid_test)
-        MSE_t.append(MSE_t_i)
-
-        MAE_t_i=mean_absolute_error(ytrain,yvalid_test)
-        MAE_t.append(MAE_t_i)
-        
-        RMSE_t_i=root_mean_squared_error(ytrain,yvalid_test)
-        RMSE_t.append(RMSE_t_i)
-        #--------------------------------------------------
-
-        #deepcopy and save neural network to dictionary
-        net_copy=copy.deepcopy(net)
-        nn_dict[i]=net_copy
-        
-        #update neural network for next step of the loop
-        nn=net
+    #train nn 300 times and save nns                                                                
+    nn_dict, RMSE_v, RMSE_t =train_one_nn(iterations, nn, xtrain, ytrain, xvalid, yvalid)
 #--------------------------------------------------
         
     #Find the model with the minimum error
-    min_error_mse=min(MSE);min_error_rmse=min(RMSE)
-    print(min_error_mse,min_error_rmse)
+    min_error_rmse=min(RMSE_v)
+    print(min_error_rmse)
 
     #Take indices of the elements with minimum error
-    min_err_mse_ind=MSE.index(min_error_mse);min_err_rmse_ind=RMSE.index(min_error_rmse)
+    min_err_rmse_ind=RMSE_v.index(min_error_rmse)
     #--------------------------------------------------------
 
-    #Plot errors
+    #Plot validation errors
+    #---------------------------------------------------
+    name_fig='validation_errors_sigma_' + str(sigma) + '_' + \
+    str(n) + '_r_' + str(realization)
+
+    plot_validation_figure(RMSE_v, RMSE_t, min_err_rmse_ind, min_error_rmse,name_fig)
     #----------------------------------------------------
-
-    #Figure settings
-    #--------------------------------
-    output_path_fig='../../results/nn_w_validation_nguyen/'
-
-    
-    name_fig='validation_errors_' + 'sigma_' + str(sigma) + '_' + str(n) + '_r_' + str(realization)
-    extensions=['.png']   #Extensions to save figure   
-    
-    #Define figure size
-    cm = 1/2.54 #convert inch to cm                                  
-    width = 10*cm; height=8*cm
-    fig=figure(figsize=(width,height), dpi=300)
-
-    #Fonts and sizes
-    size_axis=7;size_ticks=6;size_title=5
-    line_w=1;marker_s=3
-    #--------------------------------
-    plt.plot(MAE, '.', markersize=6, color='blue', label='MAE validation')
-    plt.plot(RMSE,'.',markersize=6,color='green',label='RMSE validation')
-
-    plt.plot(MAE_t, linewidth=1,linestyle='--',color='blue',label='MAE train')
-    plt.plot(RMSE_t,linewidth=1,linestyle='--',color='green',label='RMSE train')
-    plt.scatter(min_err_rmse_ind,min_error_rmse,s=80,marker='*',color='red',label='minimum rmse')
-    #--------------------------------------------------------
-
-    #Labels
-    plt.legend(loc='best', fontsize=size_ticks)
-    plt.xlabel('iterations',fontsize=size_axis);plt.ylabel('error',fontsize=size_axis)
-    plt.title('n=%d' %  n,fontsize=size_title)
-    ext=extensions[0]
-    plt.savefig(output_path_fig+name_fig+ext,dpi=300)
     
     #Best nn found
     #------------------------------------------------------
