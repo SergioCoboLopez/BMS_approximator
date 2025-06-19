@@ -23,8 +23,8 @@ sigma=sys.argv[3]       #mean of gaussian noise
 realization=sys.argv[4] #Gaussian noise realization
 runid=sys.argv[5]
 resolution='1x' #0.5x, 1x, 2x, 4e-3
-
 NPAR = 10 #number of parameters of prior
+
 # -------------------------------------------------------------------
 # Read the ANN-generated data
 resolution='1x'
@@ -32,7 +32,7 @@ resolutions={'0.5x':'0.1', '1x':'0.05' , '2x': '0.025' , '4e-3x':'0.004' }
 
 d=pd.read_csv('../../data/noisy_data/' + resolution + '_resolution/NN_' + function + '_sigma_' + str(sigma) + '_r_' + str(realization)  + '_res_' + resolutions[resolution] + '.csv')
 
-filename = 'test_BMS_' + function + '_n_' + str(n) + '_sigma_' + str(sigma) + '_r_' + str(realization) 
+filename = 'test3_parallel_BMS_' + function + '_n_' + str(n) + '_sigma_' + str(sigma) + '_r_' + str(realization) 
 #-------------------------------------------------------------------
     
 #Take specific function and -2/+2 interval
@@ -89,6 +89,9 @@ pms = Parallel(
     x=X, y=y,
     prior_par=prior_par,
 )
+
+print(pms.t1.fixed_term)
+print(pms.t1)
 
 description_lengths, mdl, mdl_model = [], np.inf, None
 
