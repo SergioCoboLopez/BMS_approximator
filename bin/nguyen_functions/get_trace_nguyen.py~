@@ -1,0 +1,118 @@
+#2024-06-03. This code builds BMS traces from datasets generated from ANN
+import sys
+import pandas as pd
+import numpy as np
+from datetime import date
+from copy import deepcopy
+import warnings
+from tqdm import tqdm
+warnings.filterwarnings("ignore")
+import os
+
+#Set the current working directory in Python
+os.chdir('/export/home/shared/Projects/ANN/Sergio/BMS_approximator/bin/nguyen_functions')
+output_path='../../data/MSTraces/nguyen/'
+
+# Command-line arguments
+# -------------------------------------------------------------------
+n = int(sys.argv[1])    #function number (1,5,7,8,10)
+sigma=sys.argv[2]       #mean of gaussian noise
+realization=sys.argv[3] #Gaussian noise realization
+runid=sys.argv[4]       #id in case of multiple runs
+resolution='1x'         #resolution
+NPAR = 10               #number of parameters of prior
+NSTEP = 50000           #number of steps
+# -------------------------------------------------------------------
+
+# Read input data and name trace file
+# -------------------------------------------------------------------
+d = pd.read_csv('../../data/noisy_data/nguyen/NN_nguyen_sigma_%s_r_%s.csv' % (sigma, realization) )
+
+file_trace='test_july_BMS_n_%s_sigma_%s_r_%s_id_%s_trace_%d_prior_%d.csv' % \
+    (n, sigma, realization, runid,NSTEP, NPAR)
+# -------------------------------------------------------------------
+
+
+d=d[d['rep']==n]
+d=d.reset_index(drop=True)
+
+
+#Train set
+sample_size=len(d.index);train_size=sample_size*0.75
+d=d.loc[0:train_size-1]
+
+# Instantiate a Tree from the desired string
+if n==10:
+    print("show variables inside if")
+    X, y = d[['x', 'y']], d['z_noise']
+    print(X)
+    print(y)            
+else:
+    X, y = d[['x']], d['z_noise']
+
+    
+XLABS = list(X.columns)
+print("print xlabs variable")
+print(XLABS)
+# -------------------------------------------------------------------
+
+# BMS
+import sys
+sys.path.append('../no_degeneracy/')
+sys.path.append('../no_degeneracy/Prior')
+from mcmc import *
+from parallel import *
+from fit_prior import read_prior_par
+
+
+# Choose and initialize priors and temperatures
+if n==10:
+    print("hello, this is the right prior")
+    prior_par = read_prior_par('../no_degeneracy/Prior/final_prior_param_sq.named_equations.nv2.np10.2016-09-09 18:49:42.600380.dat')
+else:
+    prior_par = read_prior_par('../no_degeneracy/final_prior_param_sq.named_equations.nv1.np10.2017-10-18 18:07:35.089658.dat')
+
+
+# Set the temperatures for the parallel tempering
+Ts = [1] + [1.04**k for k in range(1, 20)]
+
+
+# Initialize the parallel machine scientist
+
+print("print xlabs and variables one last time")
+print(XLABS)
+print(X)
+print(y)
+
+pms = Parallel(
+    Ts,
+    variables=XLABS,
+    parameters=['a%d' % i for i in range(8)],
+    x=X, y=y,
+    prior_par=prior_par,
+)
+
+description_lengths, mdl, mdl_model = [], np.inf, None
+
+outf = open(output_path + file_trace, 'w')
+outf.close()
+
+# MCMC
+for i in tqdm(range(NSTEP)):
+    # MCMC update
+    pms.mcmc_step() # MCMC step within each T
+    pms.tree_swap() # Attempt to swap two randomly selected consecutive temps
+    # Add the description length to the trace
+    description_lengths.append(pms.t1.E)
+
+    outf = open(output_path + file_trace, 'a')
+    print(
+        ';'.join([
+        str(kk) for kk in [i, pms.t1.E, pms.t1.pr(show_pow=True),
+                               pms.t1.par_values, pms.t1.sse, pms.t1.bic, pms.t1.EP]
+              ]),file=outf)
+    
+    outf.close()
+    # Check if this is the MDL expression so far
+    if pms.t1.E < mdl:
+        mdl, mdl_model = pms.t1.E, deepcopy(pms.t1)

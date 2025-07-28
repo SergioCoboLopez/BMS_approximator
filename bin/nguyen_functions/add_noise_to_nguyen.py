@@ -34,10 +34,10 @@ for sigma in sigmas:
 
         noise = np.random.normal(mean,sigma,sample)
 
-        #Add noise to high resolution data                                                          
+        #Add noise to high resolution data
         d['noise']=noise
         d['z_noise']= d['z'] + d['noise']
 
         #Save data
         output_path='../../data/noisy_data/nguyen/'
-        d.to_csv(output_path + 'NN_nguyen'+ '_sigma_' + str(sigma) + '_r_' + str(r) +  '.csv')
+        d.to_csv(output_path + 'NN_nguyen'+ '_sigma_' + str(sigma) + '_r_' + str(r) +  '_1.csv')

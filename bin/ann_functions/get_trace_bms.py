@@ -24,10 +24,9 @@ realization=sys.argv[4] #Gaussian noise realization
 runid=sys.argv[5]
 resolution='1x' #0.5x, 1x, 2x, 4e-3
 NPAR = 10 #number of parameters of prior
-
 # -------------------------------------------------------------------
+
 # Read the ANN-generated data
-resolution='1x'
 resolutions={'0.5x':'0.1', '1x':'0.05' , '2x': '0.025' , '4e-3x':'0.004' }
 
 d=pd.read_csv('../../data/noisy_data/' + resolution + '_resolution/NN_' + function + '_sigma_' + str(sigma) + '_r_' + str(realization)  + '_res_' + resolutions[resolution] + '.csv')

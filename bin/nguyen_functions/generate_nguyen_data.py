@@ -51,7 +51,7 @@ def nguyen4(x,y):
 
 
 #define x,y
-points=400 #80, 400 (for interpolation and extrapolation)
+points=80 #80, 400 (for interpolation and extrapolation)
 
 #points=400
 
@@ -84,15 +84,29 @@ z1 = [ nguyen0(x) for x in x1]
 z5 = [ nguyen1(x) for x in x5]
 z7 = [ nguyen2(x) for x in x7]
 z8 = [ nguyen3(x) for x in x8]
-z10 = [ nguyen4(x,y) for (x,y) in zip(x10,y10)]
+
+
+z10=[];x10d=[];y10d=[]
+for x in x10:
+    for y in y10:
+        z10.append(nguyen4(x,y))
+        x10d.append(x)
+        y10d.append(y)
+
+
 nguyen_id=[1]*len(x1)
-print(nguyen_id)
+#print(nguyen_id)
 
 d1 = pd.DataFrame({'x' : x1, 'y': ydumb, 'z' : z1, 'rep':[1]*len(x1)})
 d5 = pd.DataFrame({'x' : x5, 'y': ydumb, 'z' : z5, 'rep':[5]*len(x5)})
 d7 = pd.DataFrame({'x' : x7, 'y': ydumb, 'z' : z7, 'rep':[7]*len(x7)})
 d8 = pd.DataFrame({'x' : x8, 'y': ydumb, 'z' : z8, 'rep':[8]*len(x8)})
-d10 = pd.DataFrame({'x': x10, 'y': y10,  'z' : z10,'rep':[10]*len(x10)})
+d10 = pd.DataFrame({'x': x10d, 'y': y10d,  'z' : z10,'rep':[10]*len(x10d)})
+
+print(len(x10d))
+print(len(y10d))
+print(len(z10))
+
 
 d_all=pd.concat([d1,d5, d7,d8,d10])
 
@@ -162,7 +176,19 @@ plt.ylabel('y',fontsize=size_axis)
 #Nguyen5
 ax_04 = plt.subplot(gs[1:3,1], projection='3d')
 plt.title(r'$y_{10}=\sin(1.5x) \cos(0.5y)$',fontsize=size_title)
-ax_04.plot(x10, y10, z10, '.',color='blue', label='test')
+ax_04.plot(x10d, y10d, z10, '.',color='blue', label='test')
+ax_04.set_xlabel('x',fontsize=size_axis)
+ax_04.set_ylabel('y',fontsize=size_axis)
+ax_04.set_zlabel('z',fontsize=size_axis)
+
+
+#plt.savefig('../../results/' + 'nguyen_functions.png',dpi=300)
+plt.show()
+
+
+ax_04 = plt.subplot(projection='3d')
+plt.title(r'$y_{10}=\sin(1.5x) \cos(0.5y)$',fontsize=size_title)
+ax_04.plot(x10d, y10d, z10, '.',color='blue', label='test')
 ax_04.set_xlabel('x',fontsize=size_axis)
 ax_04.set_ylabel('y',fontsize=size_axis)
 ax_04.set_zlabel('z',fontsize=size_axis)
