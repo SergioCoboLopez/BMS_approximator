@@ -15,15 +15,15 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 import sys
-import seaborn as sns
-import matplotlib.gridspec as gridspec
+#import seaborn as sns
+#import matplotlib.gridspec as gridspec
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import root_mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from random import sample
 import random
 
-#Build validation set by randomly taking points from the training set                               
+#Build validation set by randomly taking points from the training set 
 #-------------------------------------------------------------------
 def build_validation(all_training_points,len_validation,dataframe):
 
@@ -35,7 +35,7 @@ def build_validation(all_training_points,len_validation,dataframe):
     return train_df, validation_df
 #-------------------------------------------------------------------
 
-#A function to train a neural network for one specific function                                     
+#A function to train a neural network for one specific function                                   
 #-------------------------------------------------------------------
 def train_one_nn(iterations, neural_network, x_train, y_train, x_valid, y_valid):
 
@@ -132,24 +132,28 @@ output_path='../../data/nns/nguyen/approximation/'
 
 #train/validation size 
 #----------------------------------------
-n_nguyen=[1, 5 , 7, 8, 10]
+n_nguyen=[1, 5, 7, 8, 10]
 n_points=int(len(d.index)/len(n_nguyen))
+
+print(len(d.index))
 #----------------------------------------
 
 #Define cross-validation
 #---------------------------------------------------------------------
-pre_train_fraction=3/4;pre_train_size=int(n_points*pre_train_fraction)
+pre_train_fraction=3/4;#pre_train_size=int(n_points*pre_train_fraction)
 
-validation_fraction=1/8;validation_size=int(n_points*validation_fraction)
-validation_points=sample(range(pre_train_size), k=validation_size)
-validation_points=np.sort(validation_points)
+validation_fraction=1/8;#validation_size=int(n_points*validation_fraction)
+#validation_points=sample(range(pre_train_size), k=validation_size)
+#validation_points=np.sort(validation_points)
 #---------------------------------------------------------------------
 
 #Build ANN
-ILS = 1;OLS=1
-NL, LS = 5, 10
-arch=[ILS] + NL*[LS] + [OLS]
-nn=pyrenn.CreateNN(arch)
+#---------------------------------
+# ILS = 1;OLS=1
+# NL, LS = 5, 10
+# arch=[ILS] + NL*[LS] + [OLS]
+# nn=pyrenn.CreateNN(arch)
+#---------------------------------
 
 #Cross validations
 iterations=300
@@ -160,11 +164,46 @@ for n in n_nguyen:
     dn.index.name = None
     dn=dn.reset_index(drop=True)
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    n_points=int(len(dn.index))
+    pre_train_size=int(n_points*pre_train_fraction)
+    validation_size=int(n_points*validation_fraction)
+    validation_points=sample(range(pre_train_size), k=validation_size)
+    validation_points=np.sort(validation_points)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
     train_set, validation_set=build_validation(pre_train_size, validation_points, dn)
-    xtrain=train_set['x'];ytrain=train_set['z_noise']
-    xvalid=validation_set['x'];yvalid=validation_set['z_noise']
 
-    #train nn 300 times and save nns                                                                
+    print(train_set)
+
+    if n==10:
+        xtrain=train_set[['x','y']];ytrain=train_set['z_noise']
+        xvalid=validation_set[['x','y']];yvalid=validation_set['z_noise']
+        ILS=2
+    else:
+        xtrain=train_set['x'];ytrain=train_set['z_noise']
+        xvalid=validation_set['x'];yvalid=validation_set['z_noise']
+        ILS=1
+
+ 
+
+
+    
+    #Build ANN
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # if n==10:
+    #     ILS=2
+    # else:
+    #     ILS=1
+
+    OLS=1
+    NL, LS = 5, 10
+    arch=[ILS] + NL*[LS] + [OLS]
+    nn=pyrenn.CreateNN(arch)
+    print(arch)
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    #train nn 300 times and save nns 
     nn_dict, RMSE_v, RMSE_t =train_one_nn(iterations, nn, xtrain, ytrain, xvalid, yvalid)
 #--------------------------------------------------
         

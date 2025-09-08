@@ -1,0 +1,21 @@
+#This code compares the noise instances of the corrected nguyen datasets (n10 has all the points) versus the wrong nguyen datasets (n10 has only the diagonal points)
+
+import pandas as pd
+import sys
+
+
+r=sys.argv[1]
+sigma=0.0
+
+filename='NN_nguyen_sigma_%.1f_r_%s.csv' %(sigma, r)
+new_file=pd.read_csv(filename, index_col=0)
+new_file=new_file[new_file['rep']<=8]
+old_file=pd.read_csv('wrong_nguyen_data/' + filename, index_col=0)
+old_file=new_file[new_file['rep']<=8]
+
+
+#print(new_file)
+#print(old_file)
+
+
+print(max(abs(new_file['noise'] - old_file['noise'])))

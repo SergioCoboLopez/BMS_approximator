@@ -53,8 +53,6 @@ def nguyen4(x,y):
 #define x,y
 points=80 #80, 400 (for interpolation and extrapolation)
 
-#points=400
-
 #f1
 x1_i=-1;x1_f=1; step1 = (x1_f - x1_i)/points
 x1= np.arange(x1_i, x1_f, step1)

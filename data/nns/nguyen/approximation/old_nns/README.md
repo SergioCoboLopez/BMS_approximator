@@ -1,0 +1,5 @@
+# 29-8-2025
+
+We made a mistake on n=10 and only generated data for the diagonal of this two-dimensional function.
+Because of how our codes are structured, this error escalated to all instances of nguyen functions. As a consequence, we decided to train neural networks for all functions again.
+Those neural networks are stored in this folder.

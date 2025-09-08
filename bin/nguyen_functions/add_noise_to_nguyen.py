@@ -40,4 +40,4 @@ for sigma in sigmas:
 
         #Save data
         output_path='../../data/noisy_data/nguyen/'
-        d.to_csv(output_path + 'NN_nguyen'+ '_sigma_' + str(sigma) + '_r_' + str(r) +  '_1.csv')
+        d.to_csv(output_path + 'NN_nguyen'+ '_sigma_' + str(sigma) + '_r_' + str(r) +  '.csv')
