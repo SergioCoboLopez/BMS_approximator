@@ -28,7 +28,7 @@ NSTEP = 50000           #number of steps
 # -------------------------------------------------------------------
 d = pd.read_csv('../../data/noisy_data/nguyen/NN_nguyen_sigma_%s_r_%s.csv' % (sigma, realization) )
 
-file_trace='test_10_r1_BMS_n_%s_sigma_%s_r_%s_id_%s_trace_%d_prior_%d.csv' % \
+file_trace='BMS_nguyen_n_%s_sigma_%s_r_%s_id_%s_trace_%d_prior_%d.csv' % \
     (n, sigma, realization, runid,NSTEP, NPAR)
 # -------------------------------------------------------------------
 

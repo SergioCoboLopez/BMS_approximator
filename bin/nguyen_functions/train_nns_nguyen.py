@@ -44,6 +44,7 @@ def train_one_nn(iterations, neural_network, x_train, y_train, x_valid, y_valid)
     MAE_train=[];MSE_train=[]; RMSE_train=[] #List of training errors
     neural_network_dict={} #Dictionary of neural network models
 
+    print(x_train)
 #--------------------------------------------------
     for i in range(iterations):
         #Two iterations of training a neural network (k_max=1)
@@ -134,25 +135,14 @@ output_path='../../data/nns/nguyen/approximation/'
 #----------------------------------------
 n_nguyen=[1, 5, 7, 8, 10]
 n_points=int(len(d.index)/len(n_nguyen))
-
-print(len(d.index))
 #----------------------------------------
 
 #Define cross-validation
-#---------------------------------------------------------------------
-pre_train_fraction=3/4;#pre_train_size=int(n_points*pre_train_fraction)
+#------------------------
+pre_train_fraction=3/4
+validation_fraction=1/8
+#------------------------
 
-validation_fraction=1/8;#validation_size=int(n_points*validation_fraction)
-#validation_points=sample(range(pre_train_size), k=validation_size)
-#validation_points=np.sort(validation_points)
-#---------------------------------------------------------------------
-
-#Build ANN
-#---------------------------------
-# ILS = 1;OLS=1
-# NL, LS = 5, 10
-# arch=[ILS] + NL*[LS] + [OLS]
-# nn=pyrenn.CreateNN(arch)
 #---------------------------------
 
 #Cross validations
@@ -164,38 +154,37 @@ for n in n_nguyen:
     dn.index.name = None
     dn=dn.reset_index(drop=True)
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #Train/validation/test sets
+    #---------------------------------------------------------------------------------
     n_points=int(len(dn.index))
     pre_train_size=int(n_points*pre_train_fraction)
     validation_size=int(n_points*validation_fraction)
     validation_points=sample(range(pre_train_size), k=validation_size)
     validation_points=np.sort(validation_points)
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    print(n_points)
     
     train_set, validation_set=build_validation(pre_train_size, validation_points, dn)
 
     print(train_set)
-
+    
     if n==10:
-        xtrain=train_set[['x','y']];ytrain=train_set['z_noise']
-        xvalid=validation_set[['x','y']];yvalid=validation_set['z_noise']
+        xtrain=np.array([train_set['x'].values,train_set['y'].values])
+        ytrain=train_set['z_noise']
+        xvalid=np.array([validation_set['x'].values,validation_set['y'].values])
+        yvalid=validation_set['z_noise']
         ILS=2
+
     else:
+
         xtrain=train_set['x'];ytrain=train_set['z_noise']
         xvalid=validation_set['x'];yvalid=validation_set['z_noise']
+        print(xtrain)
         ILS=1
-
- 
-
-
-    
+    #---------------------------------------------------------------------------------
+        
     #Build ANN
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    # if n==10:
-    #     ILS=2
-    # else:
-    #     ILS=1
-
     OLS=1
     NL, LS = 5, 10
     arch=[ILS] + NL*[LS] + [OLS]
@@ -226,8 +215,17 @@ for n in n_nguyen:
     #Best nn found
     #------------------------------------------------------
     net_best=nn_dict[min_err_rmse_ind]
-    xtest = dn.loc[pre_train_size:]['x']
-    xtrain_valid=dn.loc[:pre_train_size-1]['x']
+
+    if n==10:
+
+        xtest=np.array([dn.loc[pre_train_size:]['x'].values, dn.loc[pre_train_size:]['y'].values])
+        
+        xtrain_valid=np.array([dn.loc[:pre_train_size-1]['x'].values, dn.loc[:pre_train_size-1]['y'].values])
+
+    else:
+        xtest = dn.loc[pre_train_size:]['x']
+        xtrain_valid=dn.loc[:pre_train_size-1]['x']
+
     ytest_best = pyrenn.NNOut(xtrain_valid,net_best)
     ypred_best = pyrenn.NNOut(xtest,net_best)
     ymodel_best=np.concatenate((ytest_best, ypred_best))
