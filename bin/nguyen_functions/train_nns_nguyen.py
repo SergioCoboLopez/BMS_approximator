@@ -15,8 +15,6 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure
 import sys
-#import seaborn as sns
-#import matplotlib.gridspec as gridspec
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import root_mean_squared_error
 from sklearn.metrics import mean_absolute_error
@@ -134,7 +132,7 @@ output_path='../../data/nns/nguyen/approximation/'
 #train/validation size 
 #----------------------------------------
 n_nguyen=[1, 5, 7, 8, 10]
-n_points=int(len(d.index)/len(n_nguyen))
+#n_points=int(len(d.index)/len(n_nguyen))
 #----------------------------------------
 
 #Define cross-validation
@@ -169,18 +167,17 @@ for n in n_nguyen:
     print(train_set)
     
     if n==10:
+        ILS=2
         xtrain=np.array([train_set['x'].values,train_set['y'].values])
         ytrain=train_set['z_noise']
         xvalid=np.array([validation_set['x'].values,validation_set['y'].values])
         yvalid=validation_set['z_noise']
-        ILS=2
+
 
     else:
-
+        ILS=1
         xtrain=train_set['x'];ytrain=train_set['z_noise']
         xvalid=validation_set['x'];yvalid=validation_set['z_noise']
-        print(xtrain)
-        ILS=1
     #---------------------------------------------------------------------------------
         
     #Build ANN
