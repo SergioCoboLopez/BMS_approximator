@@ -168,7 +168,7 @@ validation_points=np.sort(validation_points)
 #Build ANN
 # ILS = 1;OLS=1
 # NL, LS = 5, 10
-architecture=[ILS] + NL*[LS] + [OLS]
+#architecture=[ILS] + NL*[LS] + [OLS]
 nn=pyrenn.CreateNN(architecture)
 
 n_functions=int(d['rep'].max()) #Number of functions in dataset
