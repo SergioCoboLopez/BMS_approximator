@@ -53,5 +53,5 @@ Finally, the code generates the predictions of the optimal weight distribution (
 
 ### `train_multiple_anns_script.sh`
 
-On its default version, this script calls `train_anns.py` for values of sigma between 0.0  and 0.2 with 
+On its default version, this script calls `train_anns.py` for values of sigma between 0.0  and 0.2 with $\Delta \sigma=0.02$ 
 		 
