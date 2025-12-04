@@ -9,7 +9,8 @@ This notebook is intended to be executed **only once**, as it generates all data
 
 In the **second cell**, the user can select the following parameters:
 
--Network architecture:
+-Network architecture:\
+
 	 \* `ILS`: input layer size, NL: number of layers and LS: number of nodes per layer or layer size
 	 \* `NREP`: Number of functions generated per experiment and activation function
 	 \
@@ -30,7 +31,9 @@ The dataframes with the noisy data are saved in the subfolder `noisy_data/`
 The last two cells are intended to generate figures of the functions, but are currently being developed.
 
 
-The next step would be to train ANNs in the data generated. This is done through a python code (`train_anns.py`) and a shell script associated to that code (`train_multiple_anns_script.sh`)
+### Step 2: `train_anns.py` and `train_multiple_anns_script.sh`
+
+The next step is to train ANNs using the observational data generated in Step 1. This is accomplished using the two codes mentioned above. While `train_anns.py` represents the core of this step, `train_multiple_anns_script.sh` is shell script used to train multiple dataframes sequentially.
 
 `train_anns.py`: This code creates and trains NREP neural networks using the Levenberg-Marquadt algorithm from the [pyrenn](https://pyrenn.readthedocs.io/en/latest/index.html) Python library.
 		 The network is trained with the observed data generated in the previous step. 
