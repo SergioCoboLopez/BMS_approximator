@@ -1,10 +1,10 @@
 #!/bin/bash
 
-#declare -a sigmas=('0.0' '0.02' '0.04'  '0.06' '0.08' '0.1' '0.12' '0.14' '0.16' '0.18' '0.2')
-declare -a sigmas=('0.18' '0.2')
+declare -a sigmas=('0.0' '0.02' '0.04'  '0.06' '0.08' '0.1' '0.12' '0.14' '0.16' '0.18' '0.2')
+#declare -a sigmas=('0.18' '0.2')
 
-#declare -a functions=('tanh' 'leaky_ReLU')
-declare -a functions=('leaky_ReLU')
+declare -a functions=('tanh' 'leaky_ReLU')
+#declare -a functions=('leaky_ReLU')
 
 
 step=0.05
