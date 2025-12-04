@@ -53,5 +53,10 @@ Finally, the code generates the predictions of the optimal weight distribution (
 
 ### `train_multiple_anns_script.sh`
 
-On its default version, this script calls `train_anns.py` for values of sigma between 0.0  and 0.2 with $\Delta \sigma=0.02$ 
+On its default version, this script calls `train_anns.py` for values of $\sigma$ between $0.0$  and $0.2$ with $\Delta \sigma=0.02$, for both activation functions $\tanh$ and $Leaky_ReLU$ and for a given value of the step function. The user might change the default parameters at will.
+
+
+### Step 3: Train the Bayesian Machine Scientist
+
+The third step is to train the Bayesian Machine Scientist (BMS) to get the most plausible equation that describes the observed data generated in Step 1.
 		 
