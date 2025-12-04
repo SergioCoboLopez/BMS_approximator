@@ -1,0 +1,30 @@
+28/11/2025
+
+This folder contains all necessary codes to run experiments with different neural network architectures.
+
+As a starting point, the user should run the notebook `generate_ANN_datasets.ipynb` :
+The code is intended to be run only once, as it generates all data needed for the experiments.
+
+In the **second cell**, the user can select the following parameters:
+
+-Network architecture:
+	 `ILS`: input layer size, NL: number of layers and LS: number of nodes per layer or layer size
+	 `NREP`: Number of functions generated per experiment and activation function
+	 `xmax`: limits of x in the functions. By default, symmetric limits are assumed.
+	 `steps`: a vector with the resolutions (steps) considered. Each step indicates the distance between one point and the next.
+	 `activation functions`: `tanh` and `leaky_ReLU` are considered by default. The `ReLU` function can be also selected. Additional functions need to be explicitly programmed by the user.
+
+Upon execution, the **third cell** generates and saves the dataframes with the functions in the corresponding resolutions. The code creates a new subfolder at `data/alternative_experiments/` with the new data. The subfolder will be named after the ANN architecture: `ILS_<X>_NL_<Y>_LS_<Z>/`
+
+In the **fourth cell** the user can add Gaussian noise to the original functions and generate the corresponding dataframes. The cell allows for selecting the following parameters:
+
+   `sigma_max`: maximum standard deviation of the Gaussian noise.
+   `sigma_step`: increment in values of sigma.
+   `r`: number of realizations of noise (3 is selected by default)
+
+The dataframes with the noisy data are saved in the subfolder `noisy_data/`
+
+The last two cells are intended to generate figures of the functions, but are under work yet.
+
+
+The next step would be to train ANNs in the data generated. This is done through a python code (`train_anns.py`) and a shell script associated to that code (`train_multiple_anns_script.sh`) 

@@ -1,0 +1,64 @@
+#!/bin/python3
+#This is a sample slurm code to run nn trainings on the local cluster of the Seeslab research group.
+#Adaptations to specific architectures are possible
+import subprocess
+import sys
+import numpy as np
+
+BASE_PATH = '/export/home/shared/Projects/ANN/Sergio'
+NODES_PER_TASK = 1
+PROC_PER_TASK = 1
+USER_MAIL = 'alejandro.horrillo@urv.cat'
+JOB_NAME = 'SER_'
+OUTPUT_PATH = 'logs_python_cluster.txt'
+# venv path
+COMMAND_PATH = BASE_PATH + '/venv/bin/python3'
+# "/export/home/shared/Projects/"
+SCRIPT_PATH = BASE_PATH + '/BMS_approximator/bin/experiments/train_anns.py' 
+
+functions=['leaky_ReLU', 'tanh']
+# Values of sigma
+sigmas=[0.0, 0.02, 0.04, 0.06, 0.08, 0.1, 0.12, 0.14, 0.16, 0.18, 0.2]
+#values of realizations
+realizations=[0,1,2]
+step='0.025'
+#value of step
+
+jobs=[]
+
+for function in functions:
+    for sigma in sigmas:
+        for r in realizations:
+            jobs.append([function, sigma, r,step])
+
+
+print(jobs)
+
+def generate_arguments():
+        args=jobs
+        return args
+
+# Construye el srun.
+def build_command(arg):
+        print(arg)
+        base_command = f'srun --oversubscribe --ntasks={NODES_PER_TASK} --cpus-per-task=1 --mem=3G --mail-user {USER_MAIL} -J {JOB_NAME}_{arg[0]}_{arg[1]} --mail-type=ALL --error={OUTPUT_PATH} --output={OUTPUT_PATH} '
+        
+        #multiple runs
+        script_command = f'{COMMAND_PATH} {SCRIPT_PATH} {arg[0]} {arg[1]} {arg[2]} {arg[3]}'
+        return base_command + script_command
+
+def main():
+	args = generate_arguments()
+	if len(args) == 0:
+		print("no arguments passed")
+		command = build_command('')
+		process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+		#output, error = process.communicate()
+	else:
+		for arg in args:
+			command = build_command(arg)
+			process = subprocess.Popen(command.split(), stdout=subprocess.PIPE)
+			#output, error = process.communicate()
+
+if __name__ == "__main__":
+	main()
