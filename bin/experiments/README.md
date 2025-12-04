@@ -9,14 +9,14 @@ This notebook is intended to be executed **only once**, as it generates all data
 
 In the **second cell**, the user can select the following parameters:
 
--Network architecture:\
+-Network architecture:
 
-	 \* `ILS`: input layer size, NL: number of layers and LS: number of nodes per layer or layer size
-	 \* `NREP`: Number of functions generated per experiment and activation function
-	 \
-	 \* `xmax`: limits of x in the functions. By default, symmetric limits are assumed.
-	 \* `steps`: a vector with the resolutions (steps) considered. Each step indicates the distance between one point and the next.
-	 \* `activation functions`: `tanh` and `leaky_ReLU` are considered by default. The `ReLU` function can be also selected. Additional functions need to be explicitly programmed by the user.
+\* `ILS`: input layer size, NL: number of layers and LS: number of nodes per layer or layer size
+\* `NREP`: Number of functions generated per experiment and activation function
+\
+\* `xmax`: limits of x in the functions. By default, symmetric limits are assumed.
+\* `steps`: a vector with the resolutions (steps) considered. Each step indicates the distance between one point and the next.
+\* `activation functions`: `tanh` and `leaky_ReLU` are considered by default. The `ReLU` function can be also selected. Additional functions need to be explicitly programmed by the user.
 
 Upon execution, the **third cell** generates and saves the dataframes with the functions in the corresponding resolutions. The code creates a new subfolder at `data/alternative_experiments/` with the new data. The subfolder will be named after the ANN architecture: `ILS_<X>_NL_<Y>_LS_<Z>/`
 
