@@ -53,12 +53,13 @@ Finally, the code generates the predictions of the optimal weight distribution (
 
 ### `train_multiple_anns_script.sh`
 
-On its default version, this script calls `train_anns.py` for values of $\sigma$ between $0.0$  and $0.2$ with $\Delta \sigma=0.02$, for both activation functions $\tanh$ and $Leaky_ReLU$ and for a given value of the step function. The user might change the default parameters at will.
+On its default version, this script calls `train_anns.py` for values of $\sigma$ between $0.0$  and $0.2$ with $\Delta \sigma=0.02$, for both activation functions $\tanh$ and Leaky_ReLU and for a given value of the step function. The user might change the default parameters at will.
 
 
 ### Step 3: `get_trace.py`
 
 This codes trains the Bayesian Machine Scientist (BMS) to get the most plausible equation that explains the observed data generated in Step 1. Although this code can perfectly run on a laptop or desktop computer, we have used supercomputers for our experiments, because each resolution value involves 660 simulations. On top of that, the BMS can get stuck on very long equations, implying that the code can get stuck and the user needs to re-run it again.
+
 
 The user needs to pass five external arguments that define a file with observed data. These arguments are:
 
