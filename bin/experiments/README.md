@@ -89,6 +89,6 @@ Next, the code reads the corresponding file with the data generated on step 1 an
 
 After that, the code defines the name of the variables x and y and the number of parameters used. It then reads the corresponding prior file.
 
-The following steps are setting the temperatures for the parallel tempering, setting the number of MCMC steps ( 50000, by default), and initialize the parallel machine scientist.
+The following steps are setting the temperatures for the parallel tempering, setting the number of MCMC steps (50000, by default), and initialize the parallel machine scientist.
 
 Then the code performes the MCMC steps.
