@@ -29,7 +29,7 @@ In the **fourth cell** the user can add Gaussian noise to the original functions
    `sigma_step`: increment in values of sigma.
    `r`: number of realizations of noise (3 is selected by default)
 
-The dataframes with the noisy data are saved in the subfolder `noisy_data/`. With these configuration, we generate `activation_functions*NREP*N_sigma_steps*realizations` = $2 \cdot 10 \cdot 11 \cdot3=660$ datasets per each resolution..
+The dataframes with the noisy data are saved in the subfolder `noisy_data/`. With these configuration, we generate `activation_functions*NREP*N_sigma_steps*realizations` = $2 \cdot 10 \cdot 11 \cdot3=660$ datasets per each resolution. 
 
 
 The last two cells are intended to generate figures of the functions, but are currently being developed.
@@ -64,9 +64,13 @@ The user needs to pass five external arguments that define a file with observed 
 
 
  `n`: function number, by default ranging from 0 to 9.
+ 
  `function`: by default `tanh` or `leaky_ReLu`
+ 
  `sigma`: level of Gaussian noise. By default, 0.0 to 0.2 in steps of $\Delta \sigma = 0.02$
+ 
  `realization`: the realization of Gaussian noise for each value of `sigma`. By default 0,1, or 2.
+ 
  `step`: resolution of the dataset. By default `0.1`, `0.05`, `0.025`, and `0.004`
 
 The user might define, in the initial step, any other values of these parameters, but they will need to modify the codes accordingly.
