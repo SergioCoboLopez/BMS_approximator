@@ -79,8 +79,11 @@ After that, the user needs to manually introduce the network architecture for wh
 
 
  `ILS` : Input layer size
+ 
  `NL` : Number of (hidden) layers
+ 
  `LS` : (hidden) layer size
+ 
  `OLS`: output layer size
 
 (future versions of this repository aim at automatically setting the architecture from the observational data)
