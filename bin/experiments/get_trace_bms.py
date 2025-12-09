@@ -35,9 +35,6 @@ architecture=[ILS] + NL*[LS] + [OLS]
 net_architecture='ILS%s_NL%s_LS%s' % (ILS, NL, LS)
 #--------------------------------------------------
 
-NPAR = 10 #number of parameters of prior
-# -------------------------------------------------------------------
-
 # Read the ANN-generated data
 input_path='../alternative_experiments/%s/noisy_data/%s/' % (net_architecture, step)
 filename='NN_%s_%s_sigma_%s_r_%s_step_%s.csv' % (function, net_architecture, sigma, realization, step )
@@ -76,7 +73,7 @@ from mcmc import *
 from parallel import *
 from fit_prior import read_prior_par
 
-
+NPAR = 10 #number of parameters of prior
 # Choose and initialize priors and temperatures
 if NPAR==10:
     prior_par = read_prior_par('machine-scientist/Prior/final_prior_param_sq.named_equations.nv1.np10.2017-10-18 18:07:35.089658.dat')
@@ -87,7 +84,7 @@ elif NPAR==20:
 # Set the temperatures for the parallel tempering
 Ts = [1] + [1.04**k for k in range(1, 20)]
 
-# REPEAT NREP TIMES
+# REPEAT NSTEP times
 NSTEP = 50000
 
 # Initialize the parallel machine scientist

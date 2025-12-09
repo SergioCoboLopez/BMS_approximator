@@ -30,7 +30,8 @@ In the **fourth cell** the user can add Gaussian noise to the original functions
    `sigma_step`: increment in values of sigma.
    `r`: number of realizations of noise (3 is selected by default)
 
-The dataframes with the noisy data are saved in the subfolder `noisy_data/`
+The dataframes with the noisy data are saved in the subfolder `noisy_data/`.
+
 
 The last two cells are intended to generate figures of the functions, but are currently being developed.
 
@@ -58,5 +59,31 @@ On its default version, this script calls `train_anns.py` for values of $\sigma$
 
 ### Step 3: `get_trace.py`
 
-This codes trains the Bayesian Machine Scientist (BMS) to get the most plausible equation that explains the observed data generated in Step 1.
+This codes trains the Bayesian Machine Scientist (BMS) to get the most plausible equation that explains the observed data generated in Step 1. Although the code can perfectly run on a laptop or desktop computer, we have used supercomputers for our experiments, because they typically involve 
 
+The user needs to pass five external arguments that define a file with observed data. These arguments are:
+
+
+`n`: function number, by default ranging from 0 to 9.
+`function`: by default `tanh` or `leaky_ReLu`
+`sigma`: level of Gaussian noise. By default, 0.0 to 0.2 in steps of `$\Delta \sigma = 0.02$`
+`realization`: the realization of Gaussian noise for each value of `sigma`. By default 0,1, or 2.
+`step`: resolution of the dataset. By default `0.1`, `0.05`, `0.025`, and `0.004`
+
+The user might define, in the initial step, any other values of these parameters, but they will need to modify the codes accordingly.
+After that, the user needs to manually introduce the network architecture for which they want to train the BMS:
+
+`ILS` : Input layer size
+`NL` : Number of (hidden) layers
+`LS` : (hidden) layer size
+`OLS`: output layer size
+
+(future versions of this repository aim at automatically setting the architecture from the observational data)
+
+Next, the code reads the corresponding file with the data generated on step 1 and the prediction of the ANN generated on step 2 and takes only data constrained to x=[-2,2]. It then defines a training set of 3/4 of the boserved data.
+
+After that, the code defines the name of the variables x and y and the number of parameters used. It then reads the corresponding prior file.
+
+The following steps are setting the temperatures for the parallel tempering, setting the number of MCMC steps ( 50000, by default), and initialize the parallel machine scientist.
+
+Then the code performes the MCMC steps.
