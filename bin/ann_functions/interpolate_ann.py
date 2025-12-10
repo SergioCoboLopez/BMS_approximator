@@ -4,11 +4,9 @@ import copy
 import pandas as pd
 import sys
 
-
-#CAUTION!! You need to activate a virtual environment to run this code. In your terminal type:
-#source ~/entorno/bin/activate. If you don't have a virtual environment in your computer, create
-#one with numpy 1.20 and pandas 1.2.5 so that pyrenn can work without conflicting with numpy
-#To deactivate the virtual environment type "deactivate"
+#CAUTION!! Due to conflicting versions of python libraries, you need to create and activate a virtual environment to run this code.                                                                     
+#If you don't have a virtual environment in your computer, create one with numpy 1.20 and pandas 1.2.5 so that pyrenn can work without conflicting with numpy.  
+#To activate the local virtual environment, I type source ~/entorno/bin/activate, with "entorno" being the name of my local virtual environment. To deactivate it, type "deactivate"
 
 resolution='0.5x' #1x, 2x, 0.5x, 4e-3x
 resolutions={'0.5x':'0.02', '1x':'0.01', '2x': '0.005', '4e-3x':'0.0008' }

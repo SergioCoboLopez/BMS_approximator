@@ -43,8 +43,14 @@ The next step is to train ANNs using the observational data generated in Step 1.
 
 This code creates and trains `NREP` (10, by default) neural networks using the Levenberg-Marquadt algorithm from the [pyrenn](https://pyrenn.readthedocs.io/en/latest/index.html) Python library.
 The network is trained with the observed data generated in the previous step. 
-The user needs to pass four external arguments corresponding to the observed data: activation function, sigma (level of noise), realization (of noise), and step (resolution of the data). These arguments are used to select the proper input file.
-In addition, the user needs to input the parameters of the neural network architecture. (future versions of this repository aim at automatically setting the architecture from the observational data)
+The user needs to pass five external arguments corresponding to the observed data:
+
+ `function`: activation function
+ `sigma`: level of Gaussian noise
+ `step`: resolution
+ `network_layers`: network architecture to be passes with the following format `<ILS>_<NL>_<LS>_<OLS>`. Here,  `ILS` is the input layer size, NL the number of layers, LS the number of nodes per layer or layer size and `OLS` the output layer size.
+
+These arguments are used to select the proper input file to train the nn.
 The observed data is constrained to x=[-2,2], the training set is 3/4 of the total data, the validation is 1/8 of the total data, and the training takes 300 iterations. However, the user may change any of these parameters. The validation data are randomly sampled (from a uniform distribution) from the training set.
 After each iteration, the code calculates the validation and training errors with the Root Mean Squared Error (RMSE). The RMSE is calculated using the [scikit-learn](http://scikit-learn.org/stable/) Python library. The errors from all iterations are stored in a dictionary.
 After the training is finished, the code selects the weight distribution (the iteration) with the minimum validation error. This is done to prevent [overfitting](https://en.wikipedia.org/wiki/Overfitting) .
@@ -53,12 +59,12 @@ Finally, the code generates the predictions of the optimal weight distribution (
 
 ### `train_multiple_anns_script.sh`
 
-On its default version, this script calls `train_anns.py` for values of $\sigma$ between $0.0$  and $0.2$ with $\Delta \sigma=0.02$, for both activation functions $\tanh$ and Leaky_ReLU and for a given value of the step function. The user might change the default parameters at will.
+On its default version, this script calls `train_anns.py` for a specific architecture and a value of the step parameter (resolution). It then runs over all values of $\sigma$ between $0.0$  and $0.2$ with $\Delta \sigma=0.02$, over three realizations of Gaussian noise and over both activation functions $\tanh$ and Leaky_ReLU. The user might change the default parameters at will.
 
 
-### Step 3: `get_trace.py`
+## Step 3: `get_trace.py`
 
-This codes trains the Bayesian Machine Scientist (BMS) to get the most plausible equation that explains the observed data generated in Step 1. Although this code can perfectly run on a laptop or desktop computer, we have used supercomputers for our experiments, because each resolution value involves 660 simulations. On top of that, the BMS can get stuck on very long equations, implying that the code can get stuck and the user needs to re-run it again.
+This codes trains the Bayesian Machine Scientist (BMS) to get the most plausible equation that explains the observed data generated in Step 1. Although this code can perfectly run on a laptop or desktop computer, we have used supercomputers for our experiments, because each resolution comprises 660 datasets, involving 660 simulations. On top of that, the BMS can get stuck on very long equations, implying that the code can get stuck and the user needs to re-run it again.
 
 
 The user needs to pass five external arguments that define a file with observed data. These arguments are:
@@ -94,4 +100,36 @@ After that, the code defines the name of the variables x and y and the number of
 
 The following steps are setting the temperatures for the parallel tempering, setting the number of MCMC steps (50000, by default), and initialize the parallel machine scientist.
 
-Then the code performes the MCMC steps.
+Finally, the code performes the MCMC steps and generates a trace with the 50000 closed-form equations explored.
+
+
+## Step 4: `interpolate_ann.py` and `interpolate_multiple_anns_script.sh`
+
+This section is under development
+
+The next step would be to interpolate new points with the neural networks trained on step 2. The idea is to see how good are the nns at approximating points that were not shown before but lie in between any pair of consecutive points in the original dataset. Similarly to Step 2 `interpolate_ann.py` performs a single interpolation for specific values of `function` , `sigma`, `realization` and `step` while the script `interpolate_multiple_anns_script.sh` allows to call the former code for all simulations within a given network architecture and a specific `step` (dataset resolution).
+
+### `interpolate_ann.py`
+
+Currently, it is necessary to create a virtual environment to use this code. The environment needs to include numpy 1.20 and pandas 1.2.5 to avoid compatibility issues with the lastest version of [pyrenn](https://pyrenn.readthedocs.io/en/latest/)
+Once the virtual environment has been activated (type `source ~<your_virtual_environment>/bin/activate` on a terminal), the code takes the same five external arguments as `train_anns.py` in step 2:
+
+ `function`: activation function
+ `sigma`: level of Gaussian noise
+ `step`: resolution
+ `network_layers`: network architecture to be passes with the following format `<ILS>_<NL>_<LS>_<OLS>`. Here,  `ILS` is the input layer size, NL the number of layers, LS the number of nodes per layer or layer size and `OLS` the output layer size.
+
+After that, the code selects an interpolation data file. This dataset. contains 5x points more than the original dataset for approximation.
+
+### `interpolate_multiple_anns_script.sh`
+
+
+
+
+###
+
+
+## Step 5: plot results (under development)
+
+
+

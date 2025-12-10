@@ -119,12 +119,23 @@ function=sys.argv[1]     #tanh, leaky_ReLU or others
 sigma=sys.argv[2]        #value of noise (typically, 0 to 0.2 in steps of 0.02)
 realization=sys.argv[3]  #Realizations of noise. Typically 0,1,2
 step=sys.argv[4]   #0.1, 0.05, 0.025, 0.004 (or others)
+network_layers=sys.argv[5]      #ILS-NL-LS-OLS
+
+print(network_layers)
+network_layers=network_layers.split('-')
+network_layers=[int(i) for i in network_layers]
+print(network_layers)
+
+
+ILS=network_layers[0];NL=network_layers[1]
+LS=network_layers[2];OLS=network_layers[3]
+
+
+print(network_layers)
+
 
 #ANN architecture
 #--------------------------------------------------
-ILS, NL, LS = 1, 10,15
-OLS=1
-
 architecture=[ILS] + NL*[LS] + [OLS]
 net_architecture='ILS%s_NL%s_LS%s' % (ILS, NL, LS)
 #--------------------------------------------------
@@ -136,7 +147,7 @@ filename='NN_%s_%s_sigma_%s_r_%s_step_%s.csv' % \
     (function, net_architecture, sigma, realization, str(step))
 data=input_path+filename
 
-output_path='../../data/alternative_experiments/%s/nns/%s/' % (net_architecture, step)
+output_path='../../data/alternative_experiments/%s/nns/%s/approximations/' % (net_architecture,step)
 
 try:
     os.makedirs(output_path)
@@ -166,9 +177,6 @@ validation_points=np.sort(validation_points)
 #-----------------------------------------------------
 
 #Build ANN
-# ILS = 1;OLS=1
-# NL, LS = 5, 10
-#architecture=[ILS] + NL*[LS] + [OLS]
 nn=pyrenn.CreateNN(architecture)
 
 n_functions=int(d['rep'].max()) #Number of functions in dataset
@@ -233,4 +241,5 @@ d['ymodel']=ymodel
 
 #Save updated data with model
 d.to_csv( output_path + 'NN_no_overfit_' + function + '_sigma_' + str(sigma) + '_r_' + str(realization) + '.csv')
+
 
