@@ -14,8 +14,8 @@ import os
 
 #External arguments
 function=sys.argv[1] #tanh, leaky_ReLU
-realization=sys.argv[2]
-sigma=sys.argv[3]
+sigma=sys.argv[2]
+realization=sys.argv[3]
 step=sys.argv[4]
 network_layers=sys.argv[5]      #ILS-NL-LS-OLS
 

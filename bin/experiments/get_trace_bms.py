@@ -12,8 +12,8 @@ warnings.filterwarnings("ignore")
 import os
 
 #Set the current working directory in Python
-os.chdir('/home/sees/cobo/simulations_ANN_BMS/experiments')
-
+#os.chdir('/home/sees/cobo/simulations_ANN_BMS/experiments') #llac cluster
+os.chdir('/export/home/shared/Projects/ANN/Sergio/BMS_approximator/bin/experiments') #local
 
 # Command-line arguments
 # -------------------------------------------------------------------
@@ -22,21 +22,23 @@ function=sys.argv[2]    #tanh, leaky_ReLU
 sigma=sys.argv[3]       #mean of gaussian noise
 realization=sys.argv[4] #Gaussian noise realization
 step=sys.argv[5] #0.1, 0.05,0.025,0.004
+network_layers=sys.argv[6] #ILS-NL-LS-OLS
 # -------------------------------------------------------------------
 
 print(step)
 
 #ANN architecture
-#--------------------------------------------------                                                
-ILS, NL, LS = 1, 10,15
-OLS=1
+#--------------------------------------------------
+network_layers=network_layers.split('-')
+network_layers=[int(i) for i in network_layers]
 
-architecture=[ILS] + NL*[LS] + [OLS]
+ILS=network_layers[0];NL=network_layers[1]
+LS=network_layers[2];OLS=network_layers[3]
 net_architecture='ILS%s_NL%s_LS%s' % (ILS, NL, LS)
 #--------------------------------------------------
 
 # Read the ANN-generated data
-input_path='../alternative_experiments/%s/noisy_data/%s/' % (net_architecture, step)
+input_path='../../data/alternative_experiments/%s/noisy_data/%s/' % (net_architecture, step)
 filename='NN_%s_%s_sigma_%s_r_%s_step_%s.csv' % (function, net_architecture, sigma, realization, step )
 d=pd.read_csv(input_path + filename)
 #-------------------------------------------------------------------
@@ -55,7 +57,6 @@ train_size=int(n_points*train_fraction)
 d=d.loc[0:train_size-1]
 #---------------------------------------
 
-
 # Instantiate a Tree from the desired string
 #---------------------------------------
 X, y = d[['x1']], d['y_noise']
@@ -67,8 +68,8 @@ print(y)
 # BMS
 # -------------------------------------------------------------------
 import sys
-sys.path.append('./machine-scientist')
-sys.path.append('./machine-scientist/Prior')
+sys.path.append('../no_degeneracy')
+sys.path.append('../no_degeneracy/Prior')
 from mcmc import *
 from parallel import *
 from fit_prior import read_prior_par
@@ -76,10 +77,10 @@ from fit_prior import read_prior_par
 NPAR = 10 #number of parameters of prior
 # Choose and initialize priors and temperatures
 if NPAR==10:
-    prior_par = read_prior_par('machine-scientist/Prior/final_prior_param_sq.named_equations.nv1.np10.2017-10-18 18:07:35.089658.dat')
+    prior_par = read_prior_par('../no_degeneracy/Prior/final_prior_param_sq.named_equations.nv1.np10.2017-10-18 18:07:35.089658.dat')
 
 elif NPAR==20:
-    prior_par = read_prior_par('machine-scientist/Prior/final_prior_param_sq.named_equations.nv1.np20.maxs200.2024-05-10 162907.551306.dat')
+    prior_par = read_prior_par('../no_degeneracy/Prior/final_prior_param_sq.named_equations.nv1.np20.maxs200.2024-05-10 162907.551306.dat')
 
 # Set the temperatures for the parallel tempering
 Ts = [1] + [1.04**k for k in range(1, 20)]
@@ -99,7 +100,7 @@ pms = Parallel(
 
 description_lengths, mdl, mdl_model = [], np.inf, None
 
-output_path='../alternative_experiments/%s/MStraces/%s/' % (net_architecture, step)
+output_path='../../data/alternative_experiments/%s/MStraces/%s/' % (net_architecture, step)
 
 try:
     os.makedirs(output_path)

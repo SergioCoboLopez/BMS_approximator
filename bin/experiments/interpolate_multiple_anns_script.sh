@@ -13,7 +13,7 @@ for fun in "${functions[@]}";
 do for sigma in  "${sigmas[@]}";
       do for realization in {0..2};
             do echo $s $r $fun;
-            python3 train_anns.py $fun $sigma $realization $step $layers;
+            python3 interpolate_ann.py $fun $sigma $realization $step $layers;
          done
 done
 done

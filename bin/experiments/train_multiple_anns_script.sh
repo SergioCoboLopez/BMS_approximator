@@ -7,7 +7,7 @@ declare -a functions=('tanh' 'leaky_ReLU')
 #declare -a functions=('leaky_ReLU')
 layers='1-7-12-1'
 
-step=0.025
+step=0.1
 
 for fun in "${functions[@]}";
 do for sigma in  "${sigmas[@]}";

@@ -31,7 +31,7 @@ resolutions={'0.5x':'0.1', '1x':'0.05' , '2x': '0.025' , '4e-3x':'0.004' }
 
 d=pd.read_csv('../../data/noisy_data/' + resolution + '_resolution/NN_' + function + '_sigma_' + str(sigma) + '_r_' + str(realization)  + '_res_' + resolutions[resolution] + '.csv')
 
-filename = 'test23_june_BMS_' + function + '_n_' + str(n) + '_sigma_' + str(sigma) + '_r_' + str(realization) 
+filename = 'test_BMS_' + function + '_n_' + str(n) + '_sigma_' + str(sigma) + '_r_' + str(realization) 
 #-------------------------------------------------------------------
     
 #Take specific function and -2/+2 interval

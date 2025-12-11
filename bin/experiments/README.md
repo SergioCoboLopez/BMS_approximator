@@ -48,7 +48,7 @@ The user needs to pass five external arguments corresponding to the observed dat
  `function`: activation function
  `sigma`: level of Gaussian noise
  `step`: resolution
- `network_layers`: network architecture to be passes with the following format `<ILS>_<NL>_<LS>_<OLS>`. Here,  `ILS` is the input layer size, NL the number of layers, LS the number of nodes per layer or layer size and `OLS` the output layer size.
+ `network_layers`: network architecture to be passed with the format `<ILS>_<NL>_<LS>_<OLS>`. Here,  `ILS` is the input layer size, NL the number of layers, LS the number of nodes per layer or layer size and `OLS` the output layer size.
 
 These arguments are used to select the proper input file to train the nn.
 The observed data is constrained to x=[-2,2], the training set is 3/4 of the total data, the validation is 1/8 of the total data, and the training takes 300 iterations. However, the user may change any of these parameters. The validation data are randomly sampled (from a uniform distribution) from the training set.
@@ -80,19 +80,7 @@ The user needs to pass five external arguments that define a file with observed 
  
  `step`: resolution of the dataset. By default `0.1`, `0.05`, `0.025`, and `0.004`
 
-The user might define, in the initial step, any other values of these parameters, but they will need to modify the codes accordingly.
-After that, the user needs to manually introduce the network architecture for which they want to train the BMS:
-
-
- `ILS` : Input layer size
- 
- `NL` : Number of (hidden) layers
- 
- `LS` : (hidden) layer size
- 
- `OLS`: output layer size
-
-(future versions of this repository aim at automatically setting the architecture from the observational data)
+ `network_layers`: This is the architecture of the neural network that generated the data in `Step 1`. This is parameter is given in the format `<ILS>_<NL>_<LS>_<OLS>`. Here,  `ILS` is the input layer size, `NL` the number of layers, `LS` the number of nodes per layer or layer size and `OLS` the output layer size.
 
 Next, the code reads the corresponding file with the data generated on step 1 and the prediction of the ANN generated on step 2 and takes only data constrained to x=[-2,2]. It then defines a training set of 3/4 of the boserved data.
 
@@ -103,11 +91,16 @@ The following steps are setting the temperatures for the parallel tempering, set
 Finally, the code performes the MCMC steps and generates a trace with the 50000 closed-form equations explored.
 
 
-## Step 4: `interpolate_ann.py` and `interpolate_multiple_anns_script.sh`
+## Step 4 `generate_dataframe_errors_approximation.ipynb`
+
+This section is currently under development
+
+## Step 5: `interpolate_ann.py` and `interpolate_multiple_anns_script.sh`
 
 This section is under development
 
 The next step would be to interpolate new points with the neural networks trained on step 2. The idea is to see how good are the nns at approximating points that were not shown before but lie in between any pair of consecutive points in the original dataset. Similarly to Step 2 `interpolate_ann.py` performs a single interpolation for specific values of `function` , `sigma`, `realization` and `step` while the script `interpolate_multiple_anns_script.sh` allows to call the former code for all simulations within a given network architecture and a specific `step` (dataset resolution).
+
 
 ### `interpolate_ann.py`
 
@@ -119,17 +112,21 @@ Once the virtual environment has been activated (type `source ~<your_virtual_env
  `step`: resolution
  `network_layers`: network architecture to be passes with the following format `<ILS>_<NL>_<LS>_<OLS>`. Here,  `ILS` is the input layer size, NL the number of layers, LS the number of nodes per layer or layer size and `OLS` the output layer size.
 
-After that, the code selects an interpolation data file. This dataset. contains 5x points more than the original dataset for approximation.
+After that, the code selects an interpolation data file. This dataset contains 5x points more than the original dataset for approximation.
 
 ### `interpolate_multiple_anns_script.sh`
 
+This code does a similar thing as `train_multiple_anns_script.sh` for interpolations. On its default version, this script calls `interpolate_ann.py` for a specific architecture and a value of the step parameter (resolution). It then runs over all values of $\sigma$ between $0.0$  and $0.2$ with $\Delta \sigma=0.02$, over three realizations of Gaussian noise and over both activation functions $\tanh$ and Leaky_ReLU. The user might change the default parameters at will.
+
+
+## Step 6 `generate_dataframe_errors_interpolation.ipynb`
+
+This section is currently under development
 
 
 
-###
 
-
-## Step 5: plot results (under development)
+## Step 7: plot results (under development)
 
 
 

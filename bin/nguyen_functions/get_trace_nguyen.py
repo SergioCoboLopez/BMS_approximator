@@ -28,7 +28,7 @@ NSTEP = 50000           #number of steps
 # -------------------------------------------------------------------
 d = pd.read_csv('../../data/noisy_data/nguyen/NN_nguyen_sigma_%s_r_%s.csv' % (sigma, realization) )
 
-file_trace='BMS_nguyen_n_%s_sigma_%s_r_%s_id_%s_trace_%d_prior_%d.csv' % \
+file_trace='test_BMS_nguyen_n_%s_sigma_%s_r_%s_id_%s_trace_%d_prior_%d.csv' % \
     (n, sigma, realization, runid,NSTEP, NPAR)
 # -------------------------------------------------------------------
 
@@ -72,7 +72,7 @@ if n==10:
     print("hello, this is the right prior")
     prior_par = read_prior_par('../no_degeneracy/Prior/final_prior_param_sq.named_equations.nv2.np10.2016-09-09 18:49:42.600380.dat')
 else:
-    prior_par = read_prior_par('../no_degeneracy/final_prior_param_sq.named_equations.nv1.np10.2017-10-18 18:07:35.089658.dat')
+    prior_par = read_prior_par('../no_degeneracy/Prior/final_prior_param_sq.named_equations.nv1.np10.2017-10-18 18:07:35.089658.dat')
 
 
 # Set the temperatures for the parallel tempering
