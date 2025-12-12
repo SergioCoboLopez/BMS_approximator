@@ -128,5 +128,13 @@ This section is currently under development
 
 ## Step 7: plot results (under development)
 
+### `plot_one_approximation.ipynb`
+
+This notebook allows the user to plot a single instance of ANN and BMS approximations. The user needs to input the network architecture (`ILS`, `NL`, `LS`, `OLS`), the function number `n`, the activation function `function`, level of noise `sigma`, and the realization of noise `realization`.
+The notebook generates three figures:
+
+ The ANN prediction of the observed data
+ The Energy (Minimum Description Length) of the BMS across the MCMC steps
+ A full prediction with the ANN and BMS prediction, including the Minimum Description Length (MDL) closed-form expression.
 
 

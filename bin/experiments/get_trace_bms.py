@@ -11,6 +11,9 @@ from tqdm import tqdm
 warnings.filterwarnings("ignore")
 import os
 
+import re as regex  #to fix 'numpy.64' strings
+
+
 #Set the current working directory in Python
 #os.chdir('/home/sees/cobo/simulations_ANN_BMS/experiments') #llac cluster
 os.chdir('/export/home/shared/Projects/ANN/Sergio/BMS_approximator/bin/experiments') #local
@@ -123,16 +126,40 @@ for i in tqdm(range(NSTEP)):
     # Add the description length to the trace
     description_lengths.append(pms.t1.E)
 
-    outf = open(output_path+filename, 'a')
+    # This corrections solve a problem with the no_degeneracy repo and later versions of numpy
+    #------------------------------------------------------------------------------------------
+    line = ';'.join([
+        str(kk) for kk in [
+            i,
+            pms.t1.E,
+            pms.t1.pr(show_pow=True),
+            pms.t1.par_values,
+            pms.t1.sse,
+            pms.t1.bic,
+            pms.t1.EP
+        ]
+    ])
 
-    print(
-        ';'.join([
-        str(kk) for kk in [i, pms.t1.E, pms.t1.pr(show_pow=True),
-                               pms.t1.par_values, pms.t1.sse, pms.t1.bic, pms.t1.EP]
-              ]),file=outf)
+    # Remove np.float64(...) wrappers, leaving only the number
+    line = regex.sub(r"np\.float64\(([-+eE0-9\.]+)\)", r"\1", line)
+    outf = open(output_path+filename, 'a')
+    print(line, file=outf)
+    #------------------------------------------------------------------------------------------
+
+    #Old version of the code that generates the np.float 64 wrapper
+    #----------------------------------------------------------------------------------
+    # print(
+    #     ';'.join([
+    #     str(kk) for kk in [i, pms.t1.E, pms.t1.pr(show_pow=True),
+    #                            pms.t1.par_values, pms.t1.sse, pms.t1.bic, pms.t1.EP]
+    #           ]),file=outf)
+    #----------------------------------------------------------------------------------
     
     outf.close()
     # Check if this is the MDL expression so far
     if pms.t1.E < mdl:
         mdl, mdl_model = pms.t1.E, deepcopy(pms.t1)
+
+
         
+
